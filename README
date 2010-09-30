@@ -1,0 +1,122 @@
+asbestos-avr8susb
+=================
+
+This is the asbestos-avr8susb, a ps3 exploit for Atmel avr8 devices without
+USB support.
+
+It's primarily targeted at loading asbestos, which is included in binary form.
+
+The payload (stage1) will install an usb driver which will download stage2
+from usb. Then, stage2 will netboot (dhcp + tftp). 
+
+Refer to asbestos for further information.
+
+http://git.marcansoft.com/?p=asbestos.git
+
+It could be made to run anything else by replacing stage1 (in the first
+device's descriptor in descriptor.h) and/or stage2 (in stage2.h)
+
+It should work on:
+
+- ATMega1280 (Arduino Mega)
+... and maybe more.
+
+This software is not intended to enable piracy. This software is intended to
+allow the use of third party operating systems and applications on the PS3.
+
+
+Notes
+-----
+A programmed dongle won't enumerate properly on a PC, so don't worry
+about that.
+
+This software is based on psgroove-timwu, a port of psgroove to vusb.
+
+This software includes parts of asbestos, written by Hector Martín 
+(marcan).
+
+This software includes the vusb library, written by Objective
+Development.
+
+
+Cloning
+-------
+    git clone git://github.com/rvalles/asbestos-avr8susb
+
+
+Configuring
+-----------
+Chip and board selection can usually be handled in the Makefile.
+In particular, update the MCU, BOARD, and F_CPU lines.  Suggested values:
+
+Arduino Mega
+
+    MCU = atmega1280
+    BOARD = ArduinoMega
+    F_CLOCK = 16000000
+
+
+Board-specific notes
+--------------------
+See README in subfolder for Boards corresponding to your particular board.
+
+
+Building
+--------
+On Linux, use the AVR GCC toolchain (Debian/Ubuntu package: gcc-avr).
+On MacOS X, check http://www.obdev.at/products/crosspack/download.html
+On Windows, WinAVR should do the trick.
+
+    make clean
+    make
+
+
+Programming
+-----------
+
+To program, just edit the programming options section of the Makefile
+to match your particular board programming setup. You will need avrdude
+on your path. Then do:
+
+    make program
+    
+For arduino users, you can get some hints as to how to configure the
+programming options by checking what the arduino IDE does.
+
+1. Edit your arduino preferences file setting upload.verbose to true.
+2. Open the arduino ide
+3. Create an empty sketch
+4. Upload to your board, and check the output.
+
+From the IDE's output you should be able to determine what port to use
+and other useful information about configuring the options.
+
+
+Using
+-----
+To use this exploit:
+  
+* Hard power cycle your PS3 (using the switch in back, or unplug it)
+* Plug the dongle into your PS3.
+* Press the PS3 power button, followed quickly by the eject button.
+
+After a few seconds, the first LED on your dongle should light up.
+
+After a few more seconds, the second LED will light up (or the LED
+will just go off, if you only have one).  This means the exploit
+worked!
+
+By default, the exploit will netboot the PS3 (dhcp+tftp).
+
+During stage1, the exploit will provide debug information through
+the uart.
+
+Once stage2 is running, it'll provide debug information via ethernet
+broadcast packets.
+
+Refer to asbestos for further information.
+
+
+-------
+Roc Vallès.
+<vallesroc @.aaa@ @gmail.com>
