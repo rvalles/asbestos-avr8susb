@@ -18,6 +18,9 @@ def eewrite(ser,path,verbose):
 	f=open(path,"rb")
 	buf=f.read()
 	f.close()
+	if len(buf)>65534:
+		print >>sys.stderr,"file is too big."
+		return
 	eesetsize(ser,len(buf))
 	f=open(path,"rb")
 	ser.write('w')
@@ -30,6 +33,8 @@ def eewrite(ser,path,verbose):
 		buf=f.read(28)
 		while len(ser.read())==0:
 			pass
+	if verbose:
+		sys.stderr.write('\n')
 def eegetsize(ser):
 	ser.write('s')
 	s=ser.read(2)
