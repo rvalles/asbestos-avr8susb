@@ -16,10 +16,13 @@ http://git.marcansoft.com/?p=asbestos.git
 It could be made to run anything else by replacing stage1 (in the first
 device's descriptor in descriptor.h) and/or stage2 (in stage2.h)
 
-Other atmegas do not have enough memory to fit stage2, but there is support
-to have them work with an additional i2c AT24C512 or compatible 24Cxx EEPROM.
+Most atmegas do not have enough memory to fit stage2. To work that around,
+there is support for streaming from an additional i2c AT24C512 or
+compatible 24Cxx EEPROM.
 
-I wrote a tool to program the EEPROM. It can be found in "tools/".
+I wrote a tool to program the EEPROM. It can be found in "tools/". If other
+means are used to program it, make sure the first 16bit word in the eeprom is
+the size of stage. Store stage2 next.
 
 It should work, with builtin stage2, on:
 - ATMega1280 (Arduino Mega)
@@ -79,7 +82,8 @@ See README in subfolder for Boards corresponding to your particular board.
 
 Building
 --------
-On Linux, use the AVR GCC toolchain (Debian/Ubuntu package: gcc-avr).
+On Linux, use the AVR GCC toolchain (Debian/Ubuntu package: gcc-avr) and 
+the AVR libc (Debian/Ubuntu/Gentoo package: avr-libc).
 On MacOS X, check http://www.obdev.at/products/crosspack/download.html
 On Windows, WinAVR should do the trick.
 
@@ -99,10 +103,10 @@ on your path. Then do:
 For arduino users, you can get some hints as to how to configure the
 programming options by checking what the arduino IDE does.
 
-1. Edit your arduino preferences file setting upload.verbose to true.
-2. Open the arduino ide
-3. Create an empty sketch
-4. Upload to your board, and check the output.
+1. Open the arduino ide.
+2. Import an example sketch.
+3. Press GUI button to upload to your board while holding shift.
+4. Check the output.
 
 From the IDE's output you should be able to determine what port to use
 and other useful information about configuring the options.
@@ -125,7 +129,7 @@ worked!
 By default, the exploit will netboot the PS3 (dhcp+tftp).
 
 During stage1, the exploit will provide debug information through
-the uart.
+the uart, at 57600bps.
 
 Once stage2 is running, it'll provide debug information via ethernet
 broadcast packets.
