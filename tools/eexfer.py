@@ -49,7 +49,7 @@ def eesetsize(ser,size):
 	ser.write(struct.pack("<H",int(size)))
 def main():
 	optparser = OptionParser("usage: %prog [options] <url>",version="%prog 0.1")
-	optparser.add_option("--verbose", action="store_true", dest="verbose", help="verbose", default=False)
+	optparser.add_option("--verbose", action="store_true", dest="verbose", help="be verbose", default=False)
 	optparser.add_option("--serial", dest="serial", help="specify serial port", default="/dev/ttyUSB0", metavar="dev")
 	optparser.add_option("--read", action="store_true", dest="read", help="read eeprom to stdout", default=False)
 	optparser.add_option("--write", dest="write",help="write eeprom from file", metavar="path")

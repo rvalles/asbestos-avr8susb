@@ -60,10 +60,12 @@
 
 
 # MCU name
-MCU = atmega1280
+#MCU = atmega1280
+MCU = atmega328p
 
 # Corresponds to a particular directory in the Boards subfolder.
-BOARD  = ArduinoMega
+#BOARD = ArduinoMega
+BOARD = ArduinoDuemilanove
 
 # Due to some silly timing issues. This currently needs to stay at 1
 DEBUG_LEVEL = 1
@@ -110,8 +112,8 @@ TARGET = asbestos-avr8susb
 OBJDIR = .
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = asbestos-avr8susb.c usb_utils.c usbdrv/usbdrv.c usbdrv/oddebug.c
-
+#SRC = asbestos-avr8susb.c usb_utils.c usbdrv/usbdrv.c usbdrv/oddebug.c
+SRC = asbestos-avr8susb.c usb_utils.c usbdrv/usbdrv.c usbdrv/oddebug.c eeprom.c
 
 # List C++ source files here. (C dependencies are automatically generated.)
 CPPSRC = 

@@ -21,6 +21,7 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include <util/delay.h>
+
 #include <string.h>
 #include <stdio.h>
 
@@ -31,7 +32,13 @@
 #include "usb_utils.h"
 #include "oddebug.h"
 
+#ifndef EEPROM
 #include "stage2.h"
+#endif
+
+#ifdef EEPROM
+#include <eeprom.h>
+#endif
 
 void setLed(int color) {
    RED_PORT &= ~(1 << RED_BIT);
@@ -268,15 +275,25 @@ void disconnect_port(int port)
 	port_change[port - 1] = C_PORT_CONN;
 }
 
+unsigned int stage2_size;
+
 int main(void)
 {
 	SetupHardware();
 	
 	setLed(RED);
-	
+
 	state = init;
 	switch_port(0);
 	uartPuts("Waiting for USB to be up.\n");
+
+#ifdef EEPROM
+	twiinit();
+	ee24xx_read_bytes(0, 2, (uint8_t *)&stage2_size);
+	uartPuts("i2c eeprom ready.\n");
+#else
+	stage2_size = sizeof(stage2);
+#endif	
 
 	// Copy the hub descriptor into ram, vusb's
 	// usbFunctionSetup() callback can't handle stuff
@@ -650,7 +667,11 @@ uchar usbFunctionRead(uchar *data, uchar len)
 	if(len > bytesRemaining)                // len is max chunk size
 		len = bytesRemaining;               // send an incomplete chunk
 	bytesRemaining -= len;
+#ifdef EEPROM
+	ee24xx_read_bytes(2+currentPosition, len, data);
+#else
 	memcpy_P(data,stage2+currentPosition,len);
+#endif
 	currentPosition+=len;
 	return len;                             // return real chunk size
 }
@@ -678,13 +699,12 @@ usbMsgLen_t usbFunctionSetup(uchar data[8])
 	}
 	//asbestos REQ_GET_STAGE2_SIZE
 	if (port_cur == 6 && rq->bmRequestType == TYPE_DEV2HOST && rq->bRequest == REQ_GET_STAGE2_SIZE) {
+		unsigned int size;
 		DBGMSG2("stage2 size requested.");
-		//needs to be <16bit or we're done for.
-		unsigned int stage2_size = sizeof(stage2);
-		DBGX1("size:", (uchar*) &stage2_size, sizeof(stage2_size));
+		DBGX1("size:", (uchar*)&stage2_size, sizeof(stage2_size));
 		outBuffer_Write_Word(0x0000);
-		stage2_size = (stage2_size>>8)|(stage2_size<<8);
-		outBuffer_Write_Word(stage2_size);
+		size = (stage2_size>>8)|(stage2_size<<8);
+		outBuffer_Write_Word(size);
 		return sendOutBuffer();
 	}
 	//asbestos REQ_READ_STAGE2_BLOCK
@@ -694,7 +714,7 @@ usbMsgLen_t usbFunctionSetup(uchar data[8])
 		currentPosition = rq->wIndex.word<<12;
 		//DBGX1("ofst:",&currentPosition,2);
 		//DBGX1("lgth:",&bytesRemaining,2);
-		if(bytesRemaining > sizeof(stage2) - currentPosition)
+		if(bytesRemaining > stage2_size - currentPosition)
 		{
 			uartPuts("FAIL: Request goes beyond stage2.");
 			return 0;

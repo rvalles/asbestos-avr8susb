@@ -16,9 +16,18 @@ http://git.marcansoft.com/?p=asbestos.git
 It could be made to run anything else by replacing stage1 (in the first
 device's descriptor in descriptor.h) and/or stage2 (in stage2.h)
 
-It should work on:
+Other atmegas do not have enough memory to fit stage2, but there is support
+to have them work with an additional i2c AT24C512 or compatible 24Cxx EEPROM.
 
+I wrote a tool to program the EEPROM. It can be found in "tools/".
+
+It should work, with builtin stage2, on:
 - ATMega1280 (Arduino Mega)
+... and maybe more. 
+
+It should work, with an EEPROM:
+- ATMega328P (Arduino UNO, Arduino Duemilanove)
+- ATMega168 (Arduino Duemilanove, older Arduinos)
 ... and maybe more.
 
 This software is not intended to enable piracy. This software is intended to
@@ -27,16 +36,14 @@ allow the use of third party operating systems and applications on the PS3.
 
 Notes
 -----
-A programmed dongle won't enumerate properly on a PC, so don't worry
-about that.
-
 This software is based on psgroove-timwu, a port of psgroove to vusb.
 
-This software includes parts of asbestos, written by Hector Martín 
-(marcan).
+This software includes parts of asbestos, written by Hector Martín (marcan).
 
-This software includes the vusb library, written by Objective
-Development.
+This software includes the vusb library, written by Objective Development.
+
+This software includes eeprom support functions from twitest.c, written by
+Joerg Wunsch and Ruwan Jayanetti.
 
 
 Cloning
@@ -50,9 +57,18 @@ Chip and board selection can usually be handled in the Makefile.
 In particular, update the MCU, BOARD, and F_CPU lines.  Suggested values:
 
 Arduino Mega
-
     MCU = atmega1280
     BOARD = ArduinoMega
+    F_CLOCK = 16000000
+
+Arduino Duemilanove (atmega168)
+    MCU = atmega168
+    BOARD = ArduinoDuemilanove
+    F_CLOCK = 16000000
+
+Arduino Duemilanove (atmega328p)
+    MCU = atmega328p
+    BOARD = ArduinoDuemilanove
     F_CLOCK = 16000000
 
 
