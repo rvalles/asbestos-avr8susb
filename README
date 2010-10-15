@@ -21,8 +21,8 @@ there is support for streaming from an additional i2c AT24C512 or
 compatible 24Cxx EEPROM.
 
 I wrote a tool to program the EEPROM. It can be found in "tools/". If other
-means are used to program it, make sure the first 16bit word in the eeprom is
-the size of stage. Store stage2 next.
+means are used to program it, make sure the first 16bit word in it is the size
+of stage2. Store stage2's data next.
 
 It should work, with builtin stage2, on:
 - ATMega1280 (Arduino Mega)

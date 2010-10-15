@@ -663,6 +663,7 @@ static int currentPosition, bytesRemaining;
 
 uchar usbFunctionRead(uchar *data, uchar len)
 {
+	setLed(NONE);
 	uartPutc('.');
 	if(len > bytesRemaining)                // len is max chunk size
 		len = bytesRemaining;               // send an incomplete chunk
@@ -673,6 +674,7 @@ uchar usbFunctionRead(uchar *data, uchar len)
 	memcpy_P(data,stage2+currentPosition,len);
 #endif
 	currentPosition+=len;
+	setLed(GREEN);
 	return len;                             // return real chunk size
 }
 
