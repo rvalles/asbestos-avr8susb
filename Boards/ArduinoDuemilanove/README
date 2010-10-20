@@ -14,6 +14,11 @@ Refer to schematic.png for specific pinouts. Parts needed:
 
 The switch is used to unhook the arduino from ps3 usb power. This allows the arduino to be plugged in to your computer via the normal arduino usb connector for debugging purposes.
 
+GND <--> zener <--> D- 
+D- <--> 2k2 <--> arduino D5
+D- <--> 68 <--> arduino D2
+GND <--> zener <--> D+ <--> 68 <--> arduino D4
+
 Debugging Output
 ================
 
