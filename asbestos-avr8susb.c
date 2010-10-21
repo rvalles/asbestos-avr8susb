@@ -33,7 +33,8 @@
 #include "oddebug.h"
 
 #ifndef EEPROM
-#include "stage2.h"
+#include "stage2a.h"
+#include "stage2b.h"
 #endif
 
 #ifdef EEPROM
@@ -292,7 +293,7 @@ int main(void)
 	ee24xx_read_bytes(0, 2, (uint8_t *)&stage2_size);
 	uartPuts("i2c eeprom ready.\n");
 #else
-	stage2_size = sizeof(stage2);
+	stage2_size = sizeof(stage2a)+sizeof(stage2b);
 #endif	
 
 	// Copy the hub descriptor into ram, vusb's
@@ -667,12 +668,21 @@ uchar usbFunctionRead(uchar *data, uchar len)
 	uartPutc('.');
 	if(len > bytesRemaining)                // len is max chunk size
 		len = bytesRemaining;               // send an incomplete chunk
-	bytesRemaining -= len;
 #ifdef EEPROM
 	ee24xx_read_bytes(2+currentPosition, len, data);
 #else
-	memcpy_P(data,stage2+currentPosition,len);
+	if(currentPosition<32767)
+	{
+		if(currentPosition+len>32767)
+			len=32767-currentPosition;
+		memcpy_P(data,stage2a+currentPosition,len);
+	}
+	else
+	{
+		memcpy_P(data,stage2b+currentPosition,len);
+	}
 #endif
+	bytesRemaining -= len;
 	currentPosition+=len;
 	setLed(GREEN);
 	return len;                             // return real chunk size

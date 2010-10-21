@@ -16,6 +16,10 @@ http://git.marcansoft.com/?p=asbestos.git
 It could be made to run anything else by replacing stage1 (in the first
 device's descriptor in descriptor.h) and/or stage2 (in stage2.h)
 
+Some atmegas can fit stage2 in their internal flash memory. When using those,
+be sure to prepare the arrays as includes using make_stage2_array.sh, which
+can be found in "tools/".
+
 Most atmegas do not have enough memory to fit stage2. To work that around,
 there is support for streaming from an additional i2c AT24C512 or
 compatible 24Cxx EEPROM.
