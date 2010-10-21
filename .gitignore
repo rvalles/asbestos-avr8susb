@@ -5,3 +5,7 @@
 *.o
 *.swp
 .dep/*
+stage2a.bin
+stage2a.h
+stage2b.bin
+stage2b.h
