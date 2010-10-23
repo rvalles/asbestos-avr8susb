@@ -26,7 +26,6 @@
 #include "usb_utils.h"
 #include "oddebug.h"
 //STAGE2 support.
-#define STAGE2
 #ifdef STAGE2
 #ifndef EEPROM
 #include "stage2a.h"
@@ -253,8 +252,7 @@ int main(void) {
 	//Copy the hub descriptor into ram, vusb's usbFunctionSetup() callback can't handle stuff from FLASH.
 	memcpy_P(HUB_Hub_Descriptor_ram, HUB_Hub_Descriptor, sizeof(HUB_Hub_Descriptor));
 	expire=1;
-	for (;;)
-	{
+	for (;;) {
 		if (port_cur == 0)
 			HUB_Task();
 		if (port_cur == 5)
@@ -432,8 +430,7 @@ usbMsgLen_t usbFunctionDescriptor(struct usbRequest *rq) {
 	const uint8_t  DescriptorNumber = rq->wValue.bytes[0];
 	const uint16_t  wLength = rq->wLength.word;
 	usbMsgLen_t Size = 0;
-	switch (DescriptorType)
-	{
+	switch (DescriptorType) {
 		case USBDESCR_DEVICE:
 			switch (port_cur) {
 				case 0:
@@ -559,8 +556,7 @@ enum {
 };
 static int currentPosition, bytesRemaining;
 #endif
-uchar usbFunctionRead(uchar *data, uchar len)
-{
+uchar usbFunctionRead(uchar *data, uchar len) {
 #ifdef STAGE2
 	setLed(BOTH);
 	uartPutc('.');
@@ -632,8 +628,7 @@ usbMsgLen_t usbFunctionSetup(uchar data[8]) {
 		return 0;
 	}
 	//USBRQ_SET_INTERFACE
-	if (port_cur == 5 && rq->bRequest == USBRQ_SET_INTERFACE)
-	{
+	if (port_cur == 5 && rq->bRequest == USBRQ_SET_INTERFACE) {
 		/* can ignore this */
 		return 0;
 	}
@@ -687,16 +682,16 @@ usbMsgLen_t usbFunctionSetup(uchar data[8]) {
 		if (p < 1 || p > 6)
 			return 0;
 		switch(rq->wValue.word) {
-		case 0x0010: //C_PORT_CONNECTION
-			DBGX2("Clear C_PORT_CONN: ", &p, 1);
-			port_change[p - 1] &= ~C_PORT_CONN;
-			last_port_conn_clear = p;
-			break;
-		case 0x0014: //C_PORT_RESET
-			DBGX2("Clear C_PORT_RESET: ", &p, 1);
-			port_change[p - 1] &= ~C_PORT_RESET;
-			last_port_reset_clear = p;
-			break;
+			case 0x0010: //C_PORT_CONNECTION
+				DBGX2("Clear C_PORT_CONN: ", &p, 1);
+				port_change[p - 1] &= ~C_PORT_CONN;
+				last_port_conn_clear = p;
+				break;
+			case 0x0014: //C_PORT_RESET
+				DBGX2("Clear C_PORT_RESET: ", &p, 1);
+				port_change[p - 1] &= ~C_PORT_RESET;
+				last_port_reset_clear = p;
+				break;
 		}
 		return 0;
 	}
