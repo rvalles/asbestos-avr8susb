@@ -83,6 +83,15 @@ Board-specific notes
 --------------------
 See README in subfolder for Boards corresponding to your particular board.
 
+Fritzing projects are included for Arduino Mega, Duemilanove and
+standalone board with atmega328p.
+
+Breadboard view might be helpful, but the whole thing was done as an
+experiment. I'd remake the PCBs with a better electronics CAD program if I
+intended to do those.
+
+Fritzing can be found on: http://fritzing.org
+
 
 Building
 --------
