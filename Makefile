@@ -437,7 +437,7 @@ ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
 
 
 # Default target.
-all: begin gccversion sizebefore build sizeafter end
+all: begin gccversion stages sizebefore build sizeafter end
 
 # Change the build target to build a HEX file or a library.
 #build: elf hex eep lss sym
@@ -488,6 +488,10 @@ sizeafter:
 gccversion : 
 	@$(CC) --version
 
+# Prepare stage1 and stage2
+stages:
+	tools/make_cfg1.sh
+	tools/make_stage2_array.sh
 
 # Program the device.  
 program: $(TARGET).hex $(TARGET).eep
@@ -667,6 +671,7 @@ clean_list :
 	$(REMOVE) $(SRC:.c=.s)
 	$(REMOVE) $(SRC:.c=.d)
 	$(REMOVE) $(SRC:.c=.i)
+	$(REMOVE) cfg1.bin cfg1.h stage2a.bin stage2a.h stage2b.bin stage2b.h
 	$(REMOVEDIR) .dep
 
 doxygen:

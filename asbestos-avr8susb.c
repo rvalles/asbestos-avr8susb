@@ -25,6 +25,7 @@
 #include "descriptor.h"
 #include "usb_utils.h"
 #include "oddebug.h"
+#include "cfg1.h"
 //STAGE2 support.
 #ifdef STAGE2
 #ifndef EEPROM

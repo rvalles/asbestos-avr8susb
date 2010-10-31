@@ -5,6 +5,10 @@
 *.o
 *.swp
 .dep/*
+cfg1.bin
+cfg1.h
+stage1.bin
+stage2.bin
 stage2a.bin
 stage2a.h
 stage2b.bin

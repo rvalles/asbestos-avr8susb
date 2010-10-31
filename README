@@ -1,10 +1,10 @@
 asbestos-avr8susb
 =================
 
-This is the asbestos-avr8susb, a ps3 exploit for Atmel avr8 devices without
-USB support.
+This is the asbestos-avr8susb, a ps3 exploit for Atmel avr8 devices that have
+no USB support, using software usb + a little circuit instead.
 
-It's primarily targeted at loading asbestos, which is included in binary form.
+It's primarily targeted at loading asbestos, which should be build separately.
 
 The payload (stage1) will install an usb driver which will download stage2
 from usb. Then, stage2 will netboot (dhcp + tftp). 
@@ -13,12 +13,10 @@ Refer to asbestos for further information.
 
 http://git.marcansoft.com/?p=asbestos.git
 
-It could be made to run anything else by replacing stage1 (in the first
-device's descriptor in descriptor.h) and/or stage2 (in stage2.h)
+It could be made to run anything else. Just place payload in stage1.bin and
+undefine STAGE2 if it isn't needed.
 
-Some atmegas can fit stage2 in their internal flash memory. When using those,
-be sure to prepare the arrays as includes using make_stage2_array.sh, which
-can be found in "tools/".
+Some atmegas can fit stage2 in their internal flash memory.
 
 Most atmegas do not have enough memory to fit stage2. To work that around,
 there is support for streaming from an additional i2c AT24C512 or
@@ -81,6 +79,9 @@ Arduino Duemilanove (atmega328p)
 
 Board-specific notes
 --------------------
+You'll need to build an interface circuit between your board and an USB
+connector or cable in order for the software USB to work.
+
 See README in subfolder for Boards corresponding to your particular board.
 
 Fritzing projects are included for Arduino Mega, Duemilanove and
@@ -99,6 +100,9 @@ On Linux, use the AVR GCC toolchain (Debian/Ubuntu package: gcc-avr) and
 the AVR libc (Debian/Ubuntu/Gentoo package: avr-libc).
 On MacOS X, check http://www.obdev.at/products/crosspack/download.html
 On Windows, WinAVR should do the trick.
+
+Symlink or copy stage1.bin and stage2.bin from asbestos into the current
+directory. Then do:
 
     make clean
     make
