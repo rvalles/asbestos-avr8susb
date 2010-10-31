@@ -1,6 +1,5 @@
 asbestos-avr8susb
 =================
-
 This is the asbestos-avr8susb, a ps3 exploit for Atmel avr8 devices that have
 no USB support, using software usb + a little circuit instead.
 
@@ -110,7 +109,6 @@ directory. Then do:
 
 Programming
 -----------
-
 To program, just edit the programming options section of the Makefile
 to match your particular board programming setup. You will need avrdude
 on your path. Then do:
