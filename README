@@ -3,7 +3,7 @@ asbestos-avr8susb
 This is the asbestos-avr8susb, a ps3 exploit for Atmel avr8 devices that have
 no USB support, using software usb + a little circuit instead.
 
-It's primarily targeted at loading asbestos, which should be build separately.
+It's primarily targeted at loading asbestos, which should be built separately.
 
 The payload (stage1) will install an usb driver which will download stage2
 from usb. Then, stage2 will netboot (dhcp + tftp). 
