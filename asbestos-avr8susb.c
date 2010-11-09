@@ -241,14 +241,19 @@ int main(void) {
 	setLed(RED);
 #ifdef DIPSWITCH
 	DDRB&=0xc3; //0x3c becomes 0 aka read
+	MCUCR&=0xff^(1<<PUD); //Make sure pullup disable is NOT enabled.
 	PORTB|=0x3c; //Enabling internal pullup.
-	MCUCR&=0xff^(1<<PUD); //Make sure pullup disable is NOT enabled. 
+	expire=2;
+	while(expire); //Wait a little before reading PINB.
 	setting=PINB>>2; //We don't want PB0,1, so we shift past that.
 	setting^=0xff; //We're using pullups so to make connected to GND = 1, we need to flip our values.
 	setting=setting&0x0f; //We only need to read 4 bits so we discard the higher nibble.
 #else
 	setting=0;
 #endif
+	if(setting==8)
+		panic(RED, GREEN);
+	DBGX1("Setting: ",&setting,sizeof(setting));
 	state = init;
 	switch_port(0);
 	uartPuts("Waiting for USB to be up.\n");
