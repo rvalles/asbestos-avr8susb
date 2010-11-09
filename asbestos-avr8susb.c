@@ -245,7 +245,7 @@ int main(void) {
 	MCUCR&=0xff^(1<<PUD); //Make sure pullup disable is NOT enabled. 
 	setting=PINB>>2; //We don't want PB0,1, so we shift past that.
 	setting^=0xff; //We're using pullups so to make connected to GND = 1, we need to flip our values.
-	setting=setting&0x0f; //We only need to read 4 byte so we discard the higher nibble.
+	setting=setting&0x0f; //We only need to read 4 bits so we discard the higher nibble.
 #else
 	setting=0;
 #endif
