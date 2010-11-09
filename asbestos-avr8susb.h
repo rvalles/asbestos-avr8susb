@@ -18,4 +18,6 @@
 #define RED_DDR    USB_DDRPORT(RED_LED_PORT)
 //Stage2 support.
 #define STAGE2
+//DIP switch to GND on PB2-PB5.
+#define DIPSWITCH
 #endif //_PSGROOVE_H_

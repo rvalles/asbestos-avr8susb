@@ -235,9 +235,20 @@ void disconnect_port(int port) {
 	port_change[port - 1] = C_PORT_CONN;
 }
 unsigned int stage2_size;
+uchar setting;
 int main(void) {
 	SetupHardware();
 	setLed(RED);
+#ifdef DIPSWITCH
+	DDRB&=0xc3; //0x3c becomes 0 aka read
+	PORTB|=0x3c; //Enabling internal pullup.
+	MCUCR&=0xff^(1<<PUD); //Make sure pullup disable is NOT enabled. 
+	setting=PINB>>2; //We don't want PB0,1, so we shift past that.
+	setting^=0xff; //We're using pullups so to make connected to GND = 1, we need to flip our values.
+	setting=setting&0x0f; //We only need to read 4 byte so we discard the higher nibble.
+#else
+	setting=0;
+#endif
 	state = init;
 	switch_port(0);
 	uartPuts("Waiting for USB to be up.\n");
