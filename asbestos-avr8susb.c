@@ -249,7 +249,7 @@ int main(void) {
 	setting^=0xff; //We're using pullups so to make connected to GND = 1, we need to flip our values.
 	setting=setting&0x0f; //We only need to read 4 bits so we discard the higher nibble.
 #else
-	setting=0;
+	setting=1;
 #endif
 	if(setting==8)
 		panic(RED, GREEN);
@@ -441,7 +441,7 @@ int main(void) {
 		}
 	}
 }
-
+static int currentPosition, bytesRemaining;
 usbMsgLen_t usbFunctionDescriptor(struct usbRequest *rq) {
 	const uint8_t  DescriptorType   = rq->wValue.bytes[1];
 	const uint8_t  DescriptorNumber = rq->wValue.bytes[0];
@@ -495,13 +495,18 @@ usbMsgLen_t usbFunctionDescriptor(struct usbRequest *rq) {
 						if (wLength == 8) {
 							usbMsgPtr = (void *) port1_short_config_descriptor;
 							Size = sizeof(port1_short_config_descriptor);
+							DBGMSG1("!");
 						} else {
 							usbMsgPtr = (void *) port1_config_descriptor;
 							Size = sizeof(port1_config_descriptor);
+							//no idea why the following isn't working, stashing for now
+							//bytesRemaining=sizeof(port1_config_descriptor);
+							//currentPosition=0;
+							//return USB_NO_MSG;
 						}
 						if (DescriptorNumber == 3 && wLength > 8) {
 							state = p1_ready;
-							expire = 20;
+							expire = 40;
 						}
 					}
 					break;
@@ -571,33 +576,44 @@ enum {
         REQ_READ_STAGE2_BLOCK,
 	REQ_DONE
 };
-static int currentPosition, bytesRemaining;
 #endif
 uchar usbFunctionRead(uchar *data, uchar len) {
-#ifdef STAGE2
-	setLed(BOTH);
-	uartPutc('.');
-	if(len > bytesRemaining)                // len is max chunk size
-		len = bytesRemaining;               // send an incomplete chunk
-#ifdef EEPROM
-	ee24xx_read_bytes(2+currentPosition, len, data);
-#else
-	if(currentPosition<32767) {
-		if(currentPosition+len>32767)
-			len=32767-currentPosition;
-		memcpy_P(data,stage2a+currentPosition,len);
-	} else {
-		memcpy_P(data,stage2b+currentPosition,len);
+	if (state==p1_wait_enumerate){
+		//uartPutc('.');
+		if(!bytesRemaining){
+			uartPutc('F');
+			return 0;
+		}
+		memcpy_P(data,port1_config_descriptor+currentPosition,len);
+		bytesRemaining -= len;
+		currentPosition += len;
+		return len;
 	}
-#endif
-	bytesRemaining -= len;
-	currentPosition+=len;
-	setLed(GREEN);
-	return len;                             // return real chunk size
+	if (state==done){
+#ifdef STAGE2
+		setLed(BOTH);
+		uartPutc('.');
+		if(len > bytesRemaining)                // len is max chunk size
+			len = bytesRemaining;               // send an incomplete chunk
+#ifdef EEPROM
+		ee24xx_read_bytes(2+currentPosition, len, data);
 #else
+		if(currentPosition<32767) {
+			if(currentPosition+len>32767)
+				len=32767-currentPosition;
+			memcpy_P(data,stage2a+currentPosition,len);
+		} else {
+			memcpy_P(data,stage2b+currentPosition,len);
+		}
+#endif
+		bytesRemaining -= len;
+		currentPosition += len;
+		setLed(GREEN);
+		return len;                             // return real chunk size
+#endif
+	}
 	panic(RED, GREEN);
 	return 0;
-#endif
 }
 usbMsgLen_t usbFunctionSetup(uchar data[8]) {
 	usbRequest_t *rq = (usbRequest_t *) data;
