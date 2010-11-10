@@ -5,9 +5,9 @@
 *.o
 *.swp
 .dep/*
-cfg1.bin
-cfg1.h
-stage1.bin
+cfg1_payload?.bin
+cfg1_payload?.h
+payload?.bin
 stage2.bin
 stage2a.bin
 stage2a.h

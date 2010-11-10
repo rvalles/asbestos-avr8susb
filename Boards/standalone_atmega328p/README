@@ -3,3 +3,4 @@ D- <--> 2k2 ohm <--> PD5
 D- <--> 68 ohm <--> PD2
 GND <--> Zener <--> D+
 D+ <--> 68 ohm <--> PD4
+PB2-5 <--> 1-4 DIPSWITCH <--> GND

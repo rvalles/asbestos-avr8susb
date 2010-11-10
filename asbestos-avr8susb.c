@@ -25,7 +25,11 @@
 #include "descriptor.h"
 #include "usb_utils.h"
 #include "oddebug.h"
-#include "cfg1.h"
+#include "cfg1_payload1.h"
+#ifdef DIPSWITCH
+#include "cfg1_payload2.h"
+#include "cfg1_payload3.h"
+#endif
 //STAGE2 support.
 #ifdef STAGE2
 #ifndef EEPROM
@@ -236,8 +240,10 @@ void disconnect_port(int port) {
 }
 unsigned int stage2_size;
 uchar setting;
+uchar payload_id;
 int main(void) {
 	SetupHardware();
+	uartPuts("Welcome to asbestos-avr8susb.\n");
 	setLed(RED);
 #ifdef DIPSWITCH
 	DDRB&=0xc3; //0x3c becomes 0 aka read
@@ -247,13 +253,16 @@ int main(void) {
 	while(expire); //Wait a little before reading PINB.
 	setting=PINB>>2; //We don't want PB0,1, so we shift past that.
 	setting^=0xff; //We're using pullups so to make connected to GND = 1, we need to flip our values.
-	setting=setting&0x0f; //We only need to read 4 bits so we discard the higher nibble.
+	setting&=0x0f; //We only need to read 4 bits so we discard the higher nibble.
 #else
 	setting=1;
 #endif
 	if(setting==8)
 		panic(RED, GREEN);
 	DBGX1("Setting: ",&setting,sizeof(setting));
+	payload_id=(setting&0x03); //last 2 bits of setting = payload selection. 00 is reserved, so first payload is 01.
+	DBGX1("Payload: ",&payload_id,sizeof(payload_id));
+	payload_id--; //00 is reserved, so first payload is 01.
 	state = init;
 	switch_port(0);
 	uartPuts("Waiting for USB to be up.\n");
@@ -495,14 +504,31 @@ usbMsgLen_t usbFunctionDescriptor(struct usbRequest *rq) {
 						if (wLength == 8) {
 							usbMsgPtr = (void *) port1_short_config_descriptor;
 							Size = sizeof(port1_short_config_descriptor);
-							DBGMSG1("!");
+							//DBGMSG1("!");
 						} else {
-							usbMsgPtr = (void *) port1_config_descriptor;
-							Size = sizeof(port1_config_descriptor);
+#ifdef DIPSWITCH
+							switch (payload_id){
+								case 0:
+									usbMsgPtr = (void *) port1_config_descriptor_payload1;
+									Size = sizeof(port1_config_descriptor_payload1);
+									break;
+								case 1:
+									usbMsgPtr = (void *) port1_config_descriptor_payload2;
+									Size = sizeof(port1_config_descriptor_payload2);
+									break;
+								case 2:
+									usbMsgPtr = (void *) port1_config_descriptor_payload3;
+									Size = sizeof(port1_config_descriptor_payload3);
+									break;
+							}
+#else
+							usbMsgPtr = (void *) port1_config_descriptor_payload1;
+							Size = sizeof(port1_config_descriptor_payload1);
 							//no idea why the following isn't working, stashing for now
 							//bytesRemaining=sizeof(port1_config_descriptor);
 							//currentPosition=0;
 							//return USB_NO_MSG;
+#endif
 						}
 						if (DescriptorNumber == 3 && wLength > 8) {
 							state = p1_ready;
@@ -584,7 +610,7 @@ uchar usbFunctionRead(uchar *data, uchar len) {
 			uartPutc('F');
 			return 0;
 		}
-		memcpy_P(data,port1_config_descriptor+currentPosition,len);
+		memcpy_P(data,port1_config_descriptor_payload1+currentPosition,len);
 		bytesRemaining -= len;
 		currentPosition += len;
 		return len;

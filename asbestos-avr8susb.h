@@ -19,5 +19,5 @@
 //Stage2 support.
 #define STAGE2
 //DIP switch to GND on PB2-PB5.
-#define DIPSWITCH
+//#define DIPSWITCH
 #endif //_PSGROOVE_H_
