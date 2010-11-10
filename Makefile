@@ -65,7 +65,8 @@ MCU = atmega328p
 
 # Corresponds to a particular directory in the Boards subfolder.
 #BOARD = ArduinoMega
-BOARD = ArduinoDuemilanove
+#BOARD = ArduinoDuemilanove
+BOARD = standalone_atmega328p
 
 # Due to some silly timing issues. This currently needs to stay at 1
 DEBUG_LEVEL = 1
@@ -315,10 +316,10 @@ LDFLAGS += $(patsubst %,-L%,$(EXTRALIBDIRS))
 # Type: avrdude -c ?
 # to get a full listing.
 #
-AVRDUDE_PROGRAMMER = stk500v1 -b 57600
+AVRDUDE_PROGRAMMER = usbasp
 
 # com1 = serial port. Use lpt1 to connect to parallel port.
-AVRDUDE_PORT = /dev/tty.usbserial-A6008hgx
+#AVRDUDE_PORT = /dev/tty.usbserial-A6008hgx
 
 AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 #AVRDUDE_WRITE_EEPROM = -U eeprom:w:$(TARGET).eep
@@ -338,7 +339,8 @@ AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 # to submit bug reports.
 #AVRDUDE_VERBOSE = -v -v
 
-AVRDUDE_FLAGS = -p $(MCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
+#AVRDUDE_FLAGS = -p $(MCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
+AVRDUDE_FLAGS = -p $(MCU) -c $(AVRDUDE_PROGRAMMER) -D
 AVRDUDE_FLAGS += $(AVRDUDE_NO_VERIFY)
 AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
 AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
