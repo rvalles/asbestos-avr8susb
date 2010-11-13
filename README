@@ -46,7 +46,8 @@ This software is based on psgroove-timwu, a port of psgroove to vusb.
 
 This software is designed to run asbestos, written by Hector Martín (marcan).
 
-This software includes the vusb library, written by Objective Development.
+This software includes the vusb library and the USBaspLoader bootloader,
+written by Objective Development.
 
 This software includes eeprom support functions from twitest.c, written by
 Joerg Wunsch and Ruwan Jayanetti.
