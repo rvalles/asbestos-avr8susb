@@ -4,6 +4,7 @@
 *.map
 *.o
 *.swp
+*.bak
 .dep/*
 cfg1_payload?.bin
 cfg1_payload?.h
@@ -14,3 +15,4 @@ stage2a.h
 stage2b.bin
 stage2b.h
 main.bin
+free3-cache.lib
