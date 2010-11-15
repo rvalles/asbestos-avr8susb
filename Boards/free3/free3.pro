@@ -1,4 +1,4 @@
-update=dg 14 nov 2010 02:16:23 UTC
+update=dg 14 nov 2010 22:54:17 UTC
 last_client=eeschema
 [eeschema]
 version=1
@@ -33,7 +33,7 @@ RptLab=1
 SimCmd=
 UseNetN=0
 LabSize=60
-PrintMonochrome=1
+PrintMonochrome=0
 ShowSheetReferenceAndTitleBlock=1
 [eeschema/libraries]
 LibName1=power
