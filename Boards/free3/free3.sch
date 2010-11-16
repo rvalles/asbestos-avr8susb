@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date dl 15 nov 2010 00:01:13 UTC
+EESchema Schematic File Version 2  date dt 16 nov 2010 04:33:24 UTC
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -36,7 +36,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 1 1
 Title ""
-Date "14 nov 2010"
+Date "16 nov 2010"
 Rev ""
 Comp ""
 Comment1 ""
@@ -44,9 +44,18 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-Connection ~ 8950 3450
+$Comp
+L CP1 C6
+U 1 1 4CE208FF
+P 9100 3250
+F 0 "C6" H 9150 3350 50  0000 L CNN
+F 1 "10µF" H 9150 3150 50  0000 L CNN
+	1    9100 3250
+	-1   0    0    1   
+$EndComp
+Connection ~ 9100 3450
 Wire Wire Line
-	9100 3450 8800 3450
+	9250 3450 8800 3450
 Wire Wire Line
 	8800 3450 8800 3350
 Wire Wire Line
@@ -304,17 +313,8 @@ Wire Wire Line
 Wire Wire Line
 	8800 3050 8800 3200
 Wire Wire Line
-	9100 3050 8800 3050
-Connection ~ 8950 3050
-$Comp
-L C C6
-U 1 1 4CE063D7
-P 8950 3250
-F 0 "C6" H 9000 3350 50  0000 L CNN
-F 1 "10µF" H 9000 3150 50  0000 L CNN
-	1    8950 3250
-	1    0    0    -1  
-$EndComp
+	9250 3050 8800 3050
+Connection ~ 9100 3050
 $Comp
 L R R8
 U 1 1 4CE04BD0
@@ -742,10 +742,10 @@ $EndComp
 $Comp
 L +5V #PWR022
 U 1 1 4CDEF48C
-P 9100 3450
-F 0 "#PWR022" H 9100 3540 20  0001 C CNN
-F 1 "+5V" H 9100 3540 30  0000 C CNN
-	1    9100 3450
+P 9250 3450
+F 0 "#PWR022" H 9250 3540 20  0001 C CNN
+F 1 "+5V" H 9250 3540 30  0000 C CNN
+	1    9250 3450
 	0    1    1    0   
 $EndComp
 $Comp
@@ -769,10 +769,10 @@ $EndComp
 $Comp
 L GND #PWR025
 U 1 1 4CDEF3AF
-P 9100 3050
-F 0 "#PWR025" H 9100 3050 30  0001 C CNN
-F 1 "GND" H 9100 2980 30  0001 C CNN
-	1    9100 3050
+P 9250 3050
+F 0 "#PWR025" H 9250 3050 30  0001 C CNN
+F 1 "GND" H 9250 2980 30  0001 C CNN
+	1    9250 3050
 	0    -1   -1   0   
 $EndComp
 $Comp
