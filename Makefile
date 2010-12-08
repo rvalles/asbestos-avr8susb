@@ -66,7 +66,7 @@ MCU = atmega328p
 # Corresponds to a particular directory in the Boards subfolder.
 #BOARD = ArduinoMega
 #BOARD = ArduinoDuemilanove
-BOARD = standalone_atmega328p
+BOARD = free3
 
 # Due to some silly timing issues. This currently needs to stay at 1
 DEBUG_LEVEL = 1
