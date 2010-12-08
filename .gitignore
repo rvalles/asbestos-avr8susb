@@ -6,6 +6,7 @@
 *.swp
 *.bak
 .dep/*
+key.h
 cfg1_payload?.bin
 cfg1_payload?.h
 payload?.bin
@@ -15,6 +16,6 @@ stage2a.h
 stage2b.bin
 stage2b.h
 main.bin
-free3-cache.lib
-free3.ps
-free3.svg
+Boards/free3/free3-cache.lib
+Boards/free3/free3.ps
+Boards/free3/free3.svg

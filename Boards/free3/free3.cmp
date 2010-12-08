@@ -1,94 +1,94 @@
-Cmp-Mod V01 Created by CvPCB (2010-04-21 BZR 23xx)-stable date = dl 15 nov 2010 00:13:18 UTC
+Cmp-Mod V01 Created by CvPCB (2010-04-21 BZR 23xx)-stable date = dv 26 nov 2010 09:54:38 UTC
 
 BeginCmp
 TimeStamp = /4CDEF7D3;
 Reference = C0;
 ValeurCmp = 22pF;
-IdModule  = ;
+IdModule  = C1;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CDEF7BD;
 Reference = C1;
 ValeurCmp = 22pF;
-IdModule  = ;
+IdModule  = C1;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CDEF886;
 Reference = C2;
 ValeurCmp = 100nF;
-IdModule  = ;
+IdModule  = C1;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CDEF884;
 Reference = C3;
 ValeurCmp = 100nF;
-IdModule  = ;
+IdModule  = C1;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CDEFC66;
 Reference = C4;
 ValeurCmp = 100nF;
-IdModule  = ;
+IdModule  = C1;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CDF0D2F;
 Reference = C5;
 ValeurCmp = 100nF;
-IdModule  = ;
+IdModule  = C1;
 EndCmp
 
 BeginCmp
-TimeStamp = /4CE063D7;
+TimeStamp = /4CE208FF;
 Reference = C6;
 ValeurCmp = 10µF;
-IdModule  = ;
+IdModule  = CP4;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CDF12BA;
 Reference = D0;
 ValeurCmp = ZENER_3.6v_.5w;
-IdModule  = ;
+IdModule  = D3;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CDF12FB;
 Reference = D1;
 ValeurCmp = ZENER_3.6v_.5w;
-IdModule  = ;
+IdModule  = D3;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CDF14C1;
 Reference = D2;
 ValeurCmp = LEDR;
-IdModule  = ;
+IdModule  = LED-5MM;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CDF14AE;
 Reference = D3;
 ValeurCmp = LEDG;
-IdModule  = ;
+IdModule  = LED-5MM;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CDF154C;
 Reference = D4;
 ValeurCmp = LEDB;
-IdModule  = ;
+IdModule  = LED-5MM;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CDEEFF6;
 Reference = IC0;
 ValeurCmp = ATMEGA328P;
-IdModule  = ;
+IdModule  = DIP-28__300;
 EndCmp
 
 BeginCmp
@@ -116,70 +116,70 @@ BeginCmp
 TimeStamp = /4CDF0F25;
 Reference = R0;
 ValeurCmp = 68Ω;
-IdModule  = ;
+IdModule  = R1;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CDF0F1C;
 Reference = R1;
 ValeurCmp = 68Ω;
-IdModule  = ;
+IdModule  = R1;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CDF0F20;
 Reference = R2;
 ValeurCmp = 2K2Ω;
-IdModule  = ;
+IdModule  = R1;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CDEF9AE;
 Reference = R3;
 ValeurCmp = 10KΩ;
-IdModule  = ;
+IdModule  = R1;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CDEF9BE;
 Reference = R4;
 ValeurCmp = 10KΩ;
-IdModule  = ;
+IdModule  = R1;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CDEFF14;
 Reference = R5;
 ValeurCmp = 10KΩ;
-IdModule  = ;
+IdModule  = R1;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CE04B48;
 Reference = R6;
 ValeurCmp = 470Ω;
-IdModule  = ;
+IdModule  = R1;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CE04B40;
 Reference = R7;
 ValeurCmp = 470Ω;
-IdModule  = ;
+IdModule  = R1;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CE04BD0;
 Reference = R8;
 ValeurCmp = 470Ω;
-IdModule  = ;
+IdModule  = R1;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CDF024B;
 Reference = SW0;
 ValeurCmp = DIPS_04;
-IdModule  = ;
+IdModule  = DIP-8__300;
 EndCmp
 
 BeginCmp
@@ -193,14 +193,14 @@ BeginCmp
 TimeStamp = /4CDEF050;
 Reference = U0;
 ValeurCmp = 24C512;
-IdModule  = ;
+IdModule  = DIP-8__300;
 EndCmp
 
 BeginCmp
 TimeStamp = /4CDF0BE0;
 Reference = U1;
 ValeurCmp = 24C512;
-IdModule  = ;
+IdModule  = DIP-8__300;
 EndCmp
 
 BeginCmp
