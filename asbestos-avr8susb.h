@@ -20,4 +20,6 @@
 #define STAGE2
 //DIP switch to GND on PB2-PB5.
 #define DIPSWITCH
+//Service mode JIG emulation
+//#define JIG
 #endif //_PSGROOVE_H_

@@ -114,7 +114,7 @@ OBJDIR = .
 
 # List C source files here. (C dependencies are automatically generated.)
 #SRC = asbestos-avr8susb.c usb_utils.c usbdrv/usbdrv.c usbdrv/oddebug.c
-SRC = asbestos-avr8susb.c usb_utils.c usbdrv/usbdrv.c usbdrv/oddebug.c eeprom.c
+SRC = asbestos-avr8susb.c usb_utils.c usbdrv/usbdrv.c usbdrv/oddebug.c eeprom.c hmac.c sha1.c
 
 # List C++ source files here. (C dependencies are automatically generated.)
 CPPSRC = 

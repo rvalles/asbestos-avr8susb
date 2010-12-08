@@ -30,6 +30,11 @@
 #include "cfg1_payload2.h"
 #include "cfg1_payload3.h"
 #endif
+#ifdef JIG
+#define CHALLENGE_INDEX 7
+#include "key.h"
+#include "hmac.h"
+#endif
 //STAGE2 support.
 #ifdef STAGE2
 #ifndef EEPROM
@@ -191,8 +196,25 @@ uchar usbFunctionWrite(uchar *data, uchar len) {
 	uchar tdata[9];
 	if(state==p5_wait_enumerate) {
 		static int bytes_out = 0;
+#ifdef JIG
+		for(i=0;i<len;i++)
+			jig_challenge_res[bytes_out+i]=*(data+i);
+#endif
 		bytes_out += 8;
 		if (bytes_out >= 64) {
+#ifdef JIG
+			//prepare the response
+			jig_challenge_res[1]--;
+			jig_challenge_res[3]++;
+			jig_challenge_res[6]++;
+			HMACBlock(&jig_challenge_res[CHALLENGE_INDEX],20);
+			//USB_USBTask(); //just in case
+			HMACDone();
+			jig_challenge_res[7] = jig_id[0];
+			jig_challenge_res[8] = jig_id[1];
+			for(i=0;i<20;i++)
+				jig_challenge_res[9+i] = hmacdigest[i];
+#endif
 			expire = 50;
 			state = p5_challenged;
 			DBGMSG2("Finished challenge.");
@@ -215,7 +237,11 @@ void JIG_Task(void) {
 	static uchar bytes_in = 0;
 	if (usbInterruptIsReady() && state == p5_challenged && expire == 0) {
 		if (bytes_in < 64) {
+#ifdef JIG
+			pUsbSetInterrupt(&jig_challenge_res[bytes_in], 8);
+#else
 			pUsbSetInterrupt(&jig_response[bytes_in], 8);
+#endif
 			bytes_in += 8;
 			if (bytes_in >= 64) {
 				state = p5_responded;
@@ -275,9 +301,56 @@ int main(void) {
 	stage2_size = sizeof(stage2a)+sizeof(stage2b);
 #endif
 #endif
+#ifdef JIG
+	HMACInit(jig_key,20);
+	uartPuts("jig_key ready.\n");
+#endif
 	//Copy the hub descriptor into ram, vusb's usbFunctionSetup() callback can't handle stuff from FLASH.
 	memcpy_P(HUB_Hub_Descriptor_ram, HUB_Hub_Descriptor, sizeof(HUB_Hub_Descriptor));
 	expire=1;
+#ifdef JIG
+	for (;;) {
+		if (port_cur == 0)
+			HUB_Task();
+		if (port_cur == 5)
+			JIG_Task();
+		usbPoll();
+		if (state == hub_ready && expire == 0) {
+			DBGBB1(0x00, 0xf1);
+			setLed(NONE);
+			connect_port(5);
+			state = p5_wait_reset;
+		}
+		if (state == p5_wait_reset && last_port_reset_clear == 5) {
+			DBGBB1(0x00, 0xf2);
+			uartPuts("Hub.\n");
+			setLed(RED);
+			switch_port(5);
+			state = p5_wait_enumerate;
+		}
+		if (state == p5_responded && expire == 0) {
+			DBGBB1(0x00, 0xf3);
+			setLed(NONE);
+			switch_port(0);
+			/* Need wrong data toggle again */
+			hub_int_force_data0 = 1;
+			disconnect_port(5);
+			state = p5_wait_disconnect;
+			//state = done;
+		}
+		if (state == p5_wait_disconnect && last_port_conn_clear == 5) {
+			DBGBB1(0x00, 0xf4);
+			setLed(RED);
+			state = p5_disconnected;
+			expire = 20;
+		}
+		if (state == p5_disconnected && expire == 0){
+			setLed(GREEN);
+			uartPuts("Done.\n");
+			state = done;
+		}
+	}
+#else
 	for (;;) {
 		if (port_cur == 0)
 			HUB_Task();
@@ -380,6 +453,7 @@ int main(void) {
 			hub_int_force_data0 = 1;
 			disconnect_port(3);
 			state = p3_wait_disconnect;
+			//state = done;
 		}
 		if (state == p3_wait_disconnect && last_port_conn_clear == 3) {
 			DBGBB1(0x00, 0x14);
@@ -449,6 +523,7 @@ int main(void) {
 			setLed(GREEN);
 		}
 	}
+#endif
 }
 static int currentPosition, bytesRemaining;
 usbMsgLen_t usbFunctionDescriptor(struct usbRequest *rq) {
