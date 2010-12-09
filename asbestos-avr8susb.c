@@ -206,11 +206,6 @@ uchar usbFunctionWrite(uchar *data, uchar len) {
 	uchar tdata[9];
 	if(state==p5_wait_enumerate) {
 		static int bytes_out = 0;
-		if(bytes_out==0){
-			for(i=0;i<64;i++){
-				jig_challenge_res[i]=0xFC;
-			}
-		}
 #ifdef JIG
 		for(i=0;i<len;i++) {
 			jig_challenge_res[bytes_out+i]=*(data+i);
@@ -234,8 +229,8 @@ uchar usbFunctionWrite(uchar *data, uchar len) {
 				jig_challenge_res[9+i] = hmacdigest[i];
 			for(i=29;i<64;i++)
 				jig_challenge_res[i] = 0xEC;
-#endif
 			DBGX1("Response: ",jig_challenge_res,64);
+#endif
 			expire = 50;
 			state = p5_challenged;
 			return 0;
