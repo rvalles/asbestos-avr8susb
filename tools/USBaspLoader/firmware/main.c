@@ -319,7 +319,7 @@ int __attribute__((noreturn)) main(void)
                 }
             }
 #endif
-        }while(bootLoaderCondition());  /* main event loop */
+        }while(1);  /* main event loop */
     }
     leaveBootloader();
 }
