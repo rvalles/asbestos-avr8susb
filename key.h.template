@@ -1,0 +1,10 @@
+/*
+ *Fill jig_key with a working key, set jig_id to whatever apropiate and rename to key.h
+ */
+
+const uint8_t jig_key[20] = {
+};
+
+const uint8_t jig_id [] = {0xaa, 0xaa};
+
+static uint8_t jig_challenge_res[64];

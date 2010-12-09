@@ -190,34 +190,54 @@ const uint8_t PROGMEM jig_response[64] = {
 	0xe8, 0xa3, 0x00, 0x18, 0x38, 0x63, 0x10, 0x00, 0x7c, 0x04, 0x28, 0x00, 0x40, 0x82, 0xff, 0xf4,
 	0x38, 0xc3, 0xf0, 0x20, 0x7c, 0xc9, 0x03, 0xa6, 0x4e, 0x80, 0x04, 0x20, 0x04, 0x00, 0x00, 0x00,
 };
+/*const uint8_t PROGMEM test_jig_req[64] = {
+0x00, 0x01, 0xFF, 0xFF, 0x2E, 0x02, 0x01, 0xB6,
+0xE6, 0x19, 0x25, 0x15, 0xD4, 0x17, 0x8B, 0x6E,
+0x13, 0xCF, 0xAC, 0x0E, 0x54, 0xEC, 0x41, 0x8E,
+0x32, 0xD7, 0x83, 0x00, 0x00, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};*/
 //Junk the jig challenge.
 uchar usbFunctionWrite(uchar *data, uchar len) {
 	uchar i;
 	uchar tdata[9];
 	if(state==p5_wait_enumerate) {
 		static int bytes_out = 0;
+		if(bytes_out==0){
+			for(i=0;i<64;i++){
+				jig_challenge_res[i]=0xFC;
+			}
+		}
 #ifdef JIG
-		for(i=0;i<len;i++)
+		for(i=0;i<len;i++) {
 			jig_challenge_res[bytes_out+i]=*(data+i);
+		}
+//		memcpy_P(jig_challenge_res, test_jig_req, sizeof(test_jig_req));
 #endif
-		bytes_out += 8;
+		bytes_out += len;
 		if (bytes_out >= 64) {
 #ifdef JIG
+			DBGX1("Request : ",jig_challenge_res,64);
 			//prepare the response
 			jig_challenge_res[1]--;
 			jig_challenge_res[3]++;
 			jig_challenge_res[6]++;
 			HMACBlock(&jig_challenge_res[CHALLENGE_INDEX],20);
-			//USB_USBTask(); //just in case
+			//usbPoll(); //just in case
 			HMACDone();
 			jig_challenge_res[7] = jig_id[0];
 			jig_challenge_res[8] = jig_id[1];
 			for(i=0;i<20;i++)
 				jig_challenge_res[9+i] = hmacdigest[i];
+			for(i=29;i<64;i++)
+				jig_challenge_res[i] = 0xEC;
 #endif
+			DBGX1("Response: ",jig_challenge_res,64);
 			expire = 50;
 			state = p5_challenged;
-			DBGMSG2("Finished challenge.");
 			return 0;
 		} else {
 			return 0xff; //STALL/Error.
@@ -238,7 +258,9 @@ void JIG_Task(void) {
 	if (usbInterruptIsReady() && state == p5_challenged && expire == 0) {
 		if (bytes_in < 64) {
 #ifdef JIG
-			pUsbSetInterrupt(&jig_challenge_res[bytes_in], 8);
+			//DBGX1("Sending : ",&jig_challenge_res[bytes_in], 8);
+			usbSetInterrupt(&jig_challenge_res[bytes_in], 8);
+			//uartPutc('.');
 #else
 			pUsbSetInterrupt(&jig_response[bytes_in], 8);
 #endif
@@ -291,7 +313,7 @@ int main(void) {
 	payload_id--; //00 is reserved, so first payload is 01.
 	state = init;
 	switch_port(0);
-	uartPuts("Waiting for USB to be up.\n");
+	//uartPuts("Waiting for USB to be up.\n");
 #ifdef STAGE2
 #ifdef EEPROM
 	twiinit();
