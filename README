@@ -17,6 +17,11 @@ undefine STAGE2 if it isn't needed.
 
 If DIPSWITCH is defined, three payloads can be made selectable in runtime. 
 
+If JIG is defined and a key.h provided (see key.h.template), PS3 can be put
+in factory mode. This is derived from psgrade and can be used to downgrade
+PS3's system software. Refer to psgrade for further information, including
+how to leave factory mode.
+
 Some atmegas can fit stage2 in their internal flash memory.
 
 Most atmegas do not have enough memory to fit stage2. To work that around,
@@ -43,14 +48,21 @@ allow the use of third party operating systems and applications on the PS3.
 Notes
 -----
 This software is based on psgroove-timwu, a port of psgroove to vusb.
+http://github.com/timwu/psgroove
 
 This software is designed to run asbestos, written by Hector Martín (marcan).
+http://git.marcansoft.com/?p=asbestos.git
 
 This software includes the vusb library and the USBaspLoader bootloader,
 written by Objective Development.
+http://www.obdev.at/products/vusb/
 
 This software includes eeprom support functions from twitest.c, written by
 Joerg Wunsch and Ruwan Jayanetti.
+
+This software includes my port of PSGrade to vusb. PSGrade was written by
+zAxis.
+https://github.com/zAxis/PSGrade
 
 
 Cloning
@@ -97,14 +109,17 @@ connector or cable in order for the software USB to work.
 
 See README in subfolder for Boards corresponding to your particular board.
 
-Fritzing projects are included for Arduino Mega, Duemilanove and
-standalone board with atmega328p.
+Fritzing projects are included for Arduino Mega and Duemilanove.
 
 Breadboard view might be helpful, but the whole thing was done as an
-experiment. I'd remake the PCBs with a better electronics CAD program if I
-intended to do those.
+experiment.
 
 Fritzing can be found on: http://fritzing.org
+
+Kicad project is included for free3, my atmega 328P-based ps3-enabling device,
+which I recommend DIY building at home.
+
+Kicad can be found on http://kicad.sourceforge.net/
 
 
 Building
