@@ -31,6 +31,7 @@
 #include "cfg1_payload3.h"
 #endif
 #ifdef JIG
+#define JIG_SETTING 15
 #define CHALLENGE_INDEX 7
 #include "key.h"
 #include "hmac.h"
@@ -190,46 +191,39 @@ const uint8_t PROGMEM jig_response[64] = {
 	0xe8, 0xa3, 0x00, 0x18, 0x38, 0x63, 0x10, 0x00, 0x7c, 0x04, 0x28, 0x00, 0x40, 0x82, 0xff, 0xf4,
 	0x38, 0xc3, 0xf0, 0x20, 0x7c, 0xc9, 0x03, 0xa6, 0x4e, 0x80, 0x04, 0x20, 0x04, 0x00, 0x00, 0x00,
 };
-/*const uint8_t PROGMEM test_jig_req[64] = {
-0x00, 0x01, 0xFF, 0xFF, 0x2E, 0x02, 0x01, 0xB6,
-0xE6, 0x19, 0x25, 0x15, 0xD4, 0x17, 0x8B, 0x6E,
-0x13, 0xCF, 0xAC, 0x0E, 0x54, 0xEC, 0x41, 0x8E,
-0x32, 0xD7, 0x83, 0x00, 0x00, 0x00, 0x00, 0x00,
-0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-};*/
-//Junk the jig challenge.
+uchar setting;
 uchar usbFunctionWrite(uchar *data, uchar len) {
 	uchar i;
 	uchar tdata[9];
 	if(state==p5_wait_enumerate) {
 		static int bytes_out = 0;
 #ifdef JIG
-		for(i=0;i<len;i++) {
-			jig_challenge_res[bytes_out+i]=*(data+i);
+		if(setting==JIG_SETTING){
+			for(i=0;i<len;i++) {
+				jig_challenge_res[bytes_out+i]=*(data+i);
+			}
 		}
-//		memcpy_P(jig_challenge_res, test_jig_req, sizeof(test_jig_req));
 #endif
 		bytes_out += len;
 		if (bytes_out >= 64) {
 #ifdef JIG
-			DBGX1("Request : ",jig_challenge_res,64);
-			//prepare the response
-			jig_challenge_res[1]--;
-			jig_challenge_res[3]++;
-			jig_challenge_res[6]++;
-			HMACBlock(&jig_challenge_res[CHALLENGE_INDEX],20);
-			//usbPoll(); //just in case
-			HMACDone();
-			jig_challenge_res[7] = jig_id[0];
-			jig_challenge_res[8] = jig_id[1];
-			for(i=0;i<20;i++)
-				jig_challenge_res[9+i] = hmacdigest[i];
-			for(i=29;i<64;i++)
-				jig_challenge_res[i] = 0xEC;
-			DBGX1("Response: ",jig_challenge_res,64);
+			if(setting==JIG_SETTING){
+				DBGX1("Request : ",jig_challenge_res,64);
+				//prepare the response
+				jig_challenge_res[1]--;
+				jig_challenge_res[3]++;
+				jig_challenge_res[6]++;
+				HMACBlock(&jig_challenge_res[CHALLENGE_INDEX],20);
+				//usbPoll(); //just in case
+				HMACDone();
+				jig_challenge_res[7] = jig_id[0];
+				jig_challenge_res[8] = jig_id[1];
+				for(i=0;i<20;i++)
+					jig_challenge_res[9+i] = hmacdigest[i];
+				for(i=29;i<64;i++)
+					jig_challenge_res[i] = 0xEC;
+				DBGX1("Response: ",jig_challenge_res,64);
+			}
 #endif
 			expire = 50;
 			state = p5_challenged;
@@ -253,12 +247,14 @@ void JIG_Task(void) {
 	if (usbInterruptIsReady() && state == p5_challenged && expire == 0) {
 		if (bytes_in < 64) {
 #ifdef JIG
-			//DBGX1("Sending : ",&jig_challenge_res[bytes_in], 8);
-			usbSetInterrupt(&jig_challenge_res[bytes_in], 8);
-			//uartPutc('.');
-#else
-			pUsbSetInterrupt(&jig_response[bytes_in], 8);
+			if(setting==JIG_SETTING){
+				usbSetInterrupt(&jig_challenge_res[bytes_in], 8);
+				//uartPutc('.');
+			} else
 #endif
+			{
+				pUsbSetInterrupt(&jig_response[bytes_in], 8);
+			}
 			bytes_in += 8;
 			if (bytes_in >= 64) {
 				state = p5_responded;
@@ -282,7 +278,6 @@ void disconnect_port(int port) {
 	port_change[port - 1] = C_PORT_CONN;
 }
 unsigned int stage2_size;
-uchar setting;
 uchar payload_id;
 int main(void) {
 	SetupHardware();
@@ -297,15 +292,24 @@ int main(void) {
 	setting=PINB>>2; //We don't want PB0,1, so we shift past that.
 	setting^=0xff; //We're using pullups so to make connected to GND = 1, we need to flip our values.
 	setting&=0x0f; //We only need to read 4 bits so we discard the higher nibble.
+#elif JIG
+	setting=JIG_SETTING
 #else
-	setting=1;
+	setting=JIG_SETTING;
 #endif
 	if(setting==8)
 		panic(RED, GREEN);
 	DBGX1("Setting: ",&setting,sizeof(setting));
-	payload_id=(setting&0x03); //last 2 bits of setting = payload selection. 00 is reserved, so first payload is 01.
-	DBGX1("Payload: ",&payload_id,sizeof(payload_id));
-	payload_id--; //00 is reserved, so first payload is 01.
+#ifdef JIG
+	if(setting==JIG_SETTING){
+		uartPuts("Entering JIG emulation mode.\n");
+	} else 
+#endif
+	{
+		payload_id=(setting&0x03); //last 2 bits of setting = payload selection. 00 is reserved, so first payload is 01.
+		DBGX1("Payload: ",&payload_id,sizeof(payload_id));
+		payload_id--; //00 is reserved, so first payload is 01.
+	}
 	state = init;
 	switch_port(0);
 	//uartPuts("Waiting for USB to be up.\n");
@@ -319,55 +323,59 @@ int main(void) {
 #endif
 #endif
 #ifdef JIG
-	HMACInit(jig_key,20);
-	uartPuts("jig_key ready.\n");
+	if(setting==JIG_SETTING){
+		HMACInit(jig_key,20);
+		uartPuts("jig_key ready.\n");
+	}
 #endif
 	//Copy the hub descriptor into ram, vusb's usbFunctionSetup() callback can't handle stuff from FLASH.
 	memcpy_P(HUB_Hub_Descriptor_ram, HUB_Hub_Descriptor, sizeof(HUB_Hub_Descriptor));
 	expire=1;
 #ifdef JIG
-	for (;;) {
-		if (port_cur == 0)
-			HUB_Task();
-		if (port_cur == 5)
-			JIG_Task();
-		usbPoll();
-		if (state == hub_ready && expire == 0) {
-			DBGBB1(0x00, 0xf1);
-			setLed(NONE);
-			connect_port(5);
-			state = p5_wait_reset;
-		}
-		if (state == p5_wait_reset && last_port_reset_clear == 5) {
-			DBGBB1(0x00, 0xf2);
-			uartPuts("Hub.\n");
-			setLed(RED);
-			switch_port(5);
-			state = p5_wait_enumerate;
-		}
-		if (state == p5_responded && expire == 0) {
-			DBGBB1(0x00, 0xf3);
-			setLed(NONE);
-			switch_port(0);
-			/* Need wrong data toggle again */
-			hub_int_force_data0 = 1;
-			disconnect_port(5);
-			state = p5_wait_disconnect;
-			//state = done;
-		}
-		if (state == p5_wait_disconnect && last_port_conn_clear == 5) {
-			DBGBB1(0x00, 0xf4);
-			setLed(RED);
-			state = p5_disconnected;
-			expire = 20;
-		}
-		if (state == p5_disconnected && expire == 0){
-			setLed(GREEN);
-			uartPuts("Done.\n");
-			state = done;
+	if(setting==JIG_SETTING){
+		for (;;) {
+			if (port_cur == 0)
+				HUB_Task();
+			if (port_cur == 5)
+				JIG_Task();
+			usbPoll();
+			if (state == hub_ready && expire == 0) {
+				DBGBB1(0x00, 0xf1);
+				setLed(NONE);
+				connect_port(5);
+				state = p5_wait_reset;
+			}
+			if (state == p5_wait_reset && last_port_reset_clear == 5) {
+				DBGBB1(0x00, 0xf2);
+				uartPuts("Hub.\n");
+				setLed(RED);
+				switch_port(5);
+				state = p5_wait_enumerate;
+			}
+			if (state == p5_responded && expire == 0) {
+				DBGBB1(0x00, 0xf3);
+				setLed(NONE);
+				switch_port(0);
+				/* Need wrong data toggle again */
+				hub_int_force_data0 = 1;
+				disconnect_port(5);
+				state = p5_wait_disconnect;
+				//state = done;
+			}
+			if (state == p5_wait_disconnect && last_port_conn_clear == 5) {
+				DBGBB1(0x00, 0xf4);
+				setLed(RED);
+				state = p5_disconnected;
+				expire = 20;
+			}
+			if (state == p5_disconnected && expire == 0){
+				setLed(GREEN);
+				uartPuts("Done.\n");
+				state = done;
+			}
 		}
 	}
-#else
+#endif
 	for (;;) {
 		if (port_cur == 0)
 			HUB_Task();
@@ -540,7 +548,6 @@ int main(void) {
 			setLed(GREEN);
 		}
 	}
-#endif
 }
 static int currentPosition, bytesRemaining;
 usbMsgLen_t usbFunctionDescriptor(struct usbRequest *rq) {

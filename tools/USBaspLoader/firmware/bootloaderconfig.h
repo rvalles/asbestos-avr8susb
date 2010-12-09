@@ -90,7 +90,7 @@ these macros are defined, the boot loader usees them.
  * signature) does not support page mode for EEPROM. It is required for
  * accessing the EEPROM on the ATMega8. Costs ~54 bytes.
  */
-#define BOOTLOADER_CAN_EXIT         1
+#define BOOTLOADER_CAN_EXIT         0
 /* If this macro is defined to 1, the boot loader will exit shortly after the
  * programmer closes the connection to the device. Costs ~36 bytes.
  */
