@@ -17,6 +17,7 @@ stage2a.h
 stage2b.bin
 stage2b.h
 main.bin
+tools/bin2header
 Boards/free3/free3-cache.lib
 Boards/free3/free3.ps
 Boards/free3/free3.svg

@@ -492,6 +492,7 @@ gccversion :
 
 # Prepare stage1 and stage2
 stages:
+	make -C tools/bin2header
 	tools/make_cfg1.sh
 	tools/make_stage2_array.sh
 
@@ -675,6 +676,7 @@ clean_list :
 	$(REMOVE) $(SRC:.c=.i)
 	$(REMOVE) cfg1.bin cfg1.h stage2a.bin stage2a.h stage2b.bin stage2b.h
 	$(REMOVEDIR) .dep
+	make -C tools/bin2header clean
 
 doxygen:
 	@echo Generating Project Documentation...
