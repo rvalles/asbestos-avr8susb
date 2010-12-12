@@ -1,4 +1,3 @@
-
 #ifndef _PIN_CONFIG_H_
 #define _PIN_CONFIG_H_
 
@@ -64,3 +63,4 @@
 /* Pin number the red LED is hooked up to. */
 
 #endif // _PIN_CONFIG_H_
+#define ARDUINOMEGA

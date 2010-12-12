@@ -22,7 +22,7 @@ D- <--> 68 <--> arduino D19
 GND <--> zener <--> D+ <--> 68 <--> arduino D38
 GND <--> red LED <--> 470Ω R <--> D11
 GND <--> green LED <--> 470Ω R <--> D9
-GND <--> DIP switch <-> arduino D51,D50,D10,D11 -> FIXME: Also used @ LED. Do not use DIPSWITCH on mega for now.
+GND <--> DIP switch <-> arduino D53-D50
 
 
 Debugging Output

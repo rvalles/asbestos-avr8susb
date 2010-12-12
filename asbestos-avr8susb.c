@@ -284,12 +284,19 @@ int main(void) {
 	uartPuts("Welcome to asbestos-avr8susb.\n");
 	setLed(RED);
 #ifdef DIPSWITCH
+#ifdef ARDUINOMEGA
+	DDRB&=0xf0; //0x3c becomes 0 aka read
+	PORTB|=0x0f; //Enabling internal pullup.
+#else
 	DDRB&=0xc3; //0x3c becomes 0 aka read
-	MCUCR&=0xff^(1<<PUD); //Make sure pullup disable is NOT enabled.
 	PORTB|=0x3c; //Enabling internal pullup.
+#endif
+	MCUCR&=0xff^(1<<PUD); //Make sure pullup disable is NOT enabled.
 	expire=2;
 	while(expire); //Wait a little before reading PINB.
+#ifndef ARDUINOMEGA
 	setting=PINB>>2; //We don't want PB0,1, so we shift past that.
+#endif
 	setting^=0xff; //We're using pullups so to make connected to GND = 1, we need to flip our values.
 	setting&=0x0f; //We only need to read 4 bits so we discard the higher nibble.
 #elif JIG
