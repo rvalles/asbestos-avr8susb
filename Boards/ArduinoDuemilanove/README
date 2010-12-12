@@ -1,6 +1,5 @@
 Arduino Duemilanove
 ===================
-
 Refer to schematic.png for specific pinouts. Parts needed:
 
 - 1x 2k2 ohm resistor
@@ -14,13 +13,18 @@ Refer to schematic.png for specific pinouts. Parts needed:
 
 The switch is used to unhook the arduino from ps3 usb power. This allows the arduino to be plugged in to your computer via the normal arduino usb connector for debugging purposes.
 
+
+Wiring
+------
 GND <--> zener <--> D- 
 D- <--> 2k2 <--> arduino D5
 D- <--> 68 <--> arduino D2
 GND <--> zener <--> D+ <--> 68 <--> arduino D4
+GND <--> red LED <--> 470Ω R <--> D9
+GND <--> green LED <--> 470Ω R <--> D8
+GND <--> DIP switch <-> arduino D10-13
+
 
 Debugging Output
-================
-
+----------------
 Debugging prints will come out of the arduino usb port just like the serial.print() from the usual arduino builtin library. This can be viewed with the serial monitor included in the arduino IDE, make sure to set the baud rate to 57600.
-

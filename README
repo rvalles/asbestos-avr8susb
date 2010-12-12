@@ -92,7 +92,7 @@ Arduino Duemilanove (atmega328p)
 
 Other settings can be found in "asbestos-avr8susb.h". You should at the very
 least undef DIPSWITCH unless you will connect one or emulate it by connecting
-the appropiate pins to GND, and undef STAGE2 if you're not using asbestos.
+the appropiate pins to GND and undef STAGE2 if you're not using asbestos.
 
 
 Runtime settings
