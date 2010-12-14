@@ -285,7 +285,7 @@ int main(void) {
 	setLed(RED);
 #ifdef DIPSWITCH
 #ifdef ARDUINOMEGA
-	DDRB&=0xf0; //0x3c becomes 0 aka read
+	DDRB&=0xf0; //0xf0 becomes 0 aka read
 	PORTB|=0x0f; //Enabling internal pullup.
 #else
 	DDRB&=0xc3; //0x3c becomes 0 aka read
@@ -300,7 +300,7 @@ int main(void) {
 	setting^=0xff; //We're using pullups so to make connected to GND = 1, we need to flip our values.
 	setting&=0x0f; //We only need to read 4 bits so we discard the higher nibble.
 #elif JIG
-	setting=JIG_SETTING
+	setting=JIG_SETTING;
 #else
 	setting=JIG_SETTING;
 #endif
