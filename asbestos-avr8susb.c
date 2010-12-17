@@ -755,7 +755,7 @@ enum {
         REQ_PRINT = 1,
         REQ_GET_STAGE2_SIZE,
         REQ_READ_STAGE2_BLOCK,
-	REQ_DONE
+	REQ_GET_EEPROM_SIZE
 };
 #endif
 uchar usbFunctionRead(uchar *data, uchar len) {
@@ -829,11 +829,22 @@ usbMsgLen_t usbFunctionSetup(uchar data[8]) {
 		}
 		return USB_NO_MSG;
 	}
+	//eeprom programming REQ_GET_EEPROM_SIZE
+	if (port_cur == 6 && rq->bmRequestType == TYPE_DEV2HOST && rq->bRequest == REQ_GET_EEPROM_SIZE) {
+		unsigned int size;
+		unsigned char eeid = rq->wValue.word;
+		DBGMSG2("eeprom size requested.");
+		DBGX1("eeid:", (uchar*)&eeid, sizeof(eeid));
+		ee24xx_read_bytes(eeid, 0, 2, (uint8_t *)&size);
+		DBGX1("size:", (uchar*)&size, sizeof(size));
+		outBuffer_Write_Word(size);
+		return sendOutBuffer();
+	}
 	//REQ_DONE
-	if (port_cur == 6 && rq->bmRequestType == TYPE_DEV2HOST && rq->bRequest == REQ_DONE) {
+	/*if (port_cur == 6 && rq->bmRequestType == TYPE_DEV2HOST && rq->bRequest == REQ_DONE) {
 		setLed(NONE);
 		panic(RED, GREEN);
-	}
+	}*/
 #endif
 	//done
 	if (port_cur == 6 && rq->bRequest == 0xAA) {
