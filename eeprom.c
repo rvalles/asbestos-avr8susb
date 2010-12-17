@@ -67,7 +67,7 @@
  * 1 0 1 0 E2 A9 A8 R/~W	24C08
  * 1 0 1 0 A10 A9 A8 R/~W	24C16
  */
-#define TWI_SLA_24CXX	0xa0	/* E2 E1 E0 = 0 0 0 */
+//#define TWI_SLA_24CXX	0xa0	/* E2 E1 E0 = 0 0 0 */
 
 /*
  * Note [3a]
@@ -145,17 +145,17 @@ void twiinit(void)
  * be NACKed, which the client will take as an indication to not
  * initiate further transfers.
  */
-int ee24xx_read_bytes(uint16_t eeaddr, int len, uint8_t *buf)
+int ee24xx_read_bytes(uint8_t eeid, uint16_t eeaddr, int len, uint8_t *buf)
 {
   uint8_t sla, twcr, n = 0;
   int rv = 0;
 
 #ifndef WORD_ADDRESS_16BIT
   /* patch high bits of EEPROM address into SLA */
-  sla = TWI_SLA_24CXX | (((eeaddr >> 8) & 0x07) << 1);
+  sla = eeid | (((eeaddr >> 8) & 0x07) << 1);
 #else
   /* 16-bit address devices need only TWI Device Address */
-  sla = TWI_SLA_24CXX;
+  sla = eeid;
 #endif
 
   /*
@@ -333,7 +333,7 @@ int ee24xx_read_bytes(uint16_t eeaddr, int len, uint8_t *buf)
  * re-invoke it in order to write further data.
  */
 int
-ee24xx_write_page(uint16_t eeaddr, int len, uint8_t *buf)
+ee24xx_write_page(uint8_t eeid, uint16_t eeaddr, int len, uint8_t *buf)
 {
   uint8_t sla, n = 0;
   int rv = 0;
@@ -347,10 +347,10 @@ ee24xx_write_page(uint16_t eeaddr, int len, uint8_t *buf)
 
 #ifndef WORD_ADDRESS_16BIT
   /* patch high bits of EEPROM address into SLA */
-  sla = TWI_SLA_24CXX | (((eeaddr >> 8) & 0x07) << 1);
+  sla = eeid | (((eeaddr >> 8) & 0x07) << 1);
 #else
   /* 16-bit address devices need only TWI Device Address */
-  sla = TWI_SLA_24CXX;
+  sla = eeid;
 #endif
 
   restart:
@@ -466,7 +466,7 @@ ee24xx_write_page(uint16_t eeaddr, int len, uint8_t *buf)
  * have been written.
  */
 int
-ee24xx_write_bytes(uint16_t eeaddr, int len, uint8_t *buf)
+ee24xx_write_bytes(uint8_t eeid, uint16_t eeaddr, int len, uint8_t *buf)
 {
   int rv, total;
 
@@ -477,7 +477,7 @@ ee24xx_write_bytes(uint16_t eeaddr, int len, uint8_t *buf)
       printf("Calling ee24xx_write_page(%d, %d, %p)",
 	     eeaddr, len, buf);
 #endif
-      rv = ee24xx_write_page(eeaddr, len, buf);
+      rv = ee24xx_write_page(eeid, eeaddr, len, buf);
 #if DEBUG
       printf(" => %d\n", rv);
 #endif

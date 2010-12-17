@@ -31,7 +31,7 @@
 #include "cfg1_payload3.h"
 #endif
 #ifdef JIG
-#define JIG_SETTING 15
+#define JIG_SETTING 13
 #define CHALLENGE_INDEX 7
 #include "key.h"
 #include "hmac.h"
@@ -279,6 +279,9 @@ void disconnect_port(int port) {
 }
 unsigned int stage2_size;
 uchar payload_id;
+#ifdef EEPROM
+uchar eeprom_id;
+#endif
 int main(void) {
 	SetupHardware();
 	uartPuts("Welcome to asbestos-avr8susb.\n");
@@ -299,13 +302,13 @@ int main(void) {
 #endif
 	setting^=0xff; //We're using pullups so to make connected to GND = 1, we need to flip our values.
 	setting&=0x0f; //We only need to read 4 bits so we discard the higher nibble.
-#elif JIG
+#else
+#ifdef JIG
 	setting=JIG_SETTING;
 #else
-	setting=JIG_SETTING;
+	setting=1;
 #endif
-	if(setting==8)
-		panic(RED, GREEN);
+#endif
 	DBGX1("Setting: ",&setting,sizeof(setting));
 #ifdef JIG
 	if(setting==JIG_SETTING){
@@ -313,6 +316,26 @@ int main(void) {
 	} else 
 #endif
 	{
+		switch(setting&0xC){
+			case 0xC:
+				panic(RED, GREEN);
+				break;
+			case 0x8:
+				panic(RED, GREEN);
+				break;
+			case 0x4:
+#ifdef EEPROM
+				eeprom_id=0xa1;
+#else
+				panic(RED, GREEN);
+#endif
+				break;
+			case 0x0:
+#ifdef EEPROM
+				eeprom_id=0xa0;
+#endif
+				break;
+		}
 		payload_id=(setting&0x03); //last 2 bits of setting = payload selection. 00 is reserved, so first payload is 01.
 		DBGX1("Payload: ",&payload_id,sizeof(payload_id));
 		payload_id--; //00 is reserved, so first payload is 01.
@@ -323,7 +346,7 @@ int main(void) {
 #ifdef STAGE2
 #ifdef EEPROM
 	twiinit();
-	ee24xx_read_bytes(0, 2, (uint8_t *)&stage2_size);
+	ee24xx_read_bytes(eeprom_id, 0, 2, (uint8_t *)&stage2_size);
 	uartPuts("i2c eeprom ready.\n");
 #else
 	stage2_size = sizeof(stage2a)+sizeof(stage2b);
@@ -728,7 +751,7 @@ uchar usbFunctionRead(uchar *data, uchar len) {
 		if(len > bytesRemaining)                // len is max chunk size
 			len = bytesRemaining;               // send an incomplete chunk
 #ifdef EEPROM
-		ee24xx_read_bytes(2+currentPosition, len, data);
+		ee24xx_read_bytes(eeprom_id, 2+currentPosition, len, data);
 #else
 		if(currentPosition<32767) {
 			if(currentPosition+len>32767)
