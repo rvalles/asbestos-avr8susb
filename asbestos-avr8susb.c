@@ -32,6 +32,7 @@
 #endif
 #ifdef JIG
 #define JIG_SETTING 13
+#define FINALDEV_SETTING 12
 #define CHALLENGE_INDEX 7
 #include "key.h"
 #include "hmac.h"
@@ -313,7 +314,9 @@ int main(void) {
 #ifdef JIG
 	if(setting==JIG_SETTING){
 		uartPuts("Entering JIG emulation mode.\n");
-	} else 
+	}else if(setting==FINALDEV_SETTING){
+		uartPuts("Entering final device mode directly.\n");
+	}else
 #endif
 	{
 		switch(setting&0xC){
@@ -363,7 +366,7 @@ int main(void) {
 	expire=1;
 #ifdef JIG
 	if(setting==JIG_SETTING){
-		for (;;) {
+		for(;;){
 			if (port_cur == 0)
 				HUB_Task();
 			if (port_cur == 5)
@@ -406,7 +409,30 @@ int main(void) {
 		}
 	}
 #endif
-	for (;;) {
+	if(setting==FINALDEV_SETTING){
+		for(;;){
+			if (port_cur == 0)
+				HUB_Task();
+			usbPoll();
+			if (state == hub_ready && expire == 0) {
+				DBGBB1(0x00, 0xa1);
+				setLed(NONE);
+				connect_port(6);
+				state = p6_wait_reset;
+			}
+			if (state == p6_wait_reset && last_port_reset_clear == 6) {
+				DBGBB1(0x00, 0xa2);
+				setLed(RED);
+				switch_port(6);
+				uartPuts("Final device ready.\n");
+				state = done;
+			}
+			if (state == done) {
+				setLed(GREEN);
+			}
+		}
+	}
+	for(;;){
 		if (port_cur == 0)
 			HUB_Task();
 		if (port_cur == 5)
