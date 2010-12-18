@@ -193,56 +193,6 @@ const uint8_t PROGMEM jig_response[64] = {
 	0x38, 0xc3, 0xf0, 0x20, 0x7c, 0xc9, 0x03, 0xa6, 0x4e, 0x80, 0x04, 0x20, 0x04, 0x00, 0x00, 0x00,
 };
 uchar setting;
-uchar usbFunctionWrite(uchar *data, uchar len) {
-	uchar i;
-	uchar tdata[9];
-	if(state==p5_wait_enumerate) {
-		static int bytes_out = 0;
-#ifdef JIG
-		if(setting==JIG_SETTING){
-			for(i=0;i<len;i++) {
-				jig_challenge_res[bytes_out+i]=*(data+i);
-			}
-		}
-#endif
-		bytes_out += len;
-		if (bytes_out >= 64) {
-#ifdef JIG
-			if(setting==JIG_SETTING){
-				DBGX1("Request : ",jig_challenge_res,64);
-				//prepare the response
-				jig_challenge_res[1]--;
-				jig_challenge_res[3]++;
-				jig_challenge_res[6]++;
-				HMACBlock(&jig_challenge_res[CHALLENGE_INDEX],20);
-				//usbPoll(); //just in case
-				HMACDone();
-				jig_challenge_res[7] = jig_id[0];
-				jig_challenge_res[8] = jig_id[1];
-				for(i=0;i<20;i++)
-					jig_challenge_res[9+i] = hmacdigest[i];
-				for(i=29;i<64;i++)
-					jig_challenge_res[i] = 0xEC;
-				DBGX1("Response: ",jig_challenge_res,64);
-			}
-#endif
-			expire = 50;
-			state = p5_challenged;
-			return 0;
-		} else {
-			return 0xff; //STALL/Error.
-		}
-	}
-	if(state==done) {
-		for(i=0;i<len;i++) {
-			tdata[i]=*(data+i);
-		}
-		tdata[i]=0;
-		uartPuts((char*)tdata);
-		return 0;
-	}
-	return 0xff; //there is no logic to handle when the state isn't p5 or done.
-}
 void JIG_Task(void) {
 	static uchar bytes_in = 0;
 	if (usbInterruptIsReady() && state == p5_challenged && expire == 0) {
@@ -748,20 +698,69 @@ usbMsgLen_t usbFunctionDescriptor(struct usbRequest *rq) {
 	DBG2(0x01, &DescriptorNumber, 1);
 	return Size;
 }
-#ifdef STAGE2
-#define TYPE_HOST2DEV 0x40
-#define TYPE_DEV2HOST 0xc0
-enum { 
-        REQ_PRINT = 1,
-        REQ_GET_STAGE2_SIZE,
-        REQ_READ_STAGE2_BLOCK,
-	REQ_GET_EEPROM_SIZE,
-	REQ_SET_EEPROM_SIZE,
-	REQ_READ_EEPROM_BYTE,
-	REQ_WRITE_EEPROM_BYTE,
-	REQ_READ_EEPROM_EIGHT
+enum {
+	WRITE_PRINT=0,
+	WRITE_EEPROM
 };
+uchar writeop;
+uchar usbFunctionWrite(uchar *data, uchar len) {
+	uchar i;
+	uchar tdata[9];
+	if(state==p5_wait_enumerate) {
+		static int bytes_out = 0;
+#ifdef JIG
+		if(setting==JIG_SETTING){
+			for(i=0;i<len;i++) {
+				jig_challenge_res[bytes_out+i]=*(data+i);
+			}
+		}
 #endif
+		bytes_out += len;
+		if (bytes_out >= 64) {
+#ifdef JIG
+			if(setting==JIG_SETTING){
+				DBGX1("Request : ",jig_challenge_res,64);
+				//prepare the response
+				jig_challenge_res[1]--;
+				jig_challenge_res[3]++;
+				jig_challenge_res[6]++;
+				HMACBlock(&jig_challenge_res[CHALLENGE_INDEX],20);
+				//usbPoll(); //just in case
+				HMACDone();
+				jig_challenge_res[7] = jig_id[0];
+				jig_challenge_res[8] = jig_id[1];
+				for(i=0;i<20;i++)
+					jig_challenge_res[9+i] = hmacdigest[i];
+				for(i=29;i<64;i++)
+					jig_challenge_res[i] = 0xEC;
+				DBGX1("Response: ",jig_challenge_res,64);
+			}
+#endif
+			expire = 50;
+			state = p5_challenged;
+			return 0;
+		} else {
+			return 0xff; //STALL/Error.
+		}
+	}
+	if(state==done) {
+		switch(writeop){
+			case WRITE_PRINT:
+				for(i=0;i<len;i++) {
+					tdata[i]=*(data+i);
+				}
+				tdata[i]=0;
+				uartPuts((char*)tdata);
+				return 0;
+				break;
+			case WRITE_EEPROM:
+				ee24xx_write_bytes(eeprom_id, 2+currentPosition, len, (uint8_t *)data);
+				return 0;
+				break;
+		}
+	}
+	return 0xff; //there is no logic to handle when the state isn't p5 or done.
+}
 uchar usbFunctionRead(uchar *data, uchar len) {
 	if (state==p1_wait_enumerate){
 		//uartPutc('.');
@@ -800,6 +799,18 @@ uchar usbFunctionRead(uchar *data, uchar len) {
 	panic(RED, GREEN);
 	return 0;
 }
+#define TYPE_HOST2DEV 0x40
+#define TYPE_DEV2HOST 0xc0
+enum { 
+        REQ_PRINT = 1,
+        REQ_GET_STAGE2_SIZE,
+        REQ_READ_STAGE2_BLOCK,
+	REQ_GET_EEPROM_SIZE,
+	REQ_SET_EEPROM_SIZE,
+	REQ_READ_EEPROM_BYTE,
+	REQ_WRITE_EEPROM_BYTE,
+	REQ_READ_EEPROM_EIGHT
+};
 usbMsgLen_t usbFunctionSetup(uchar data[8]) {
 	usbRequest_t *rq = (usbRequest_t *) data;
 	// uchar msg[] = {usbDeviceAddr, usbNewDeviceAddr};
@@ -807,6 +818,7 @@ usbMsgLen_t usbFunctionSetup(uchar data[8]) {
 	//asbestos REQ_PRINT
 	if (port_cur == 6 && rq->bmRequestType == TYPE_HOST2DEV && rq->bRequest == REQ_PRINT) {
 		DBGMSG2("debug print requested");
+		writeop=WRITE_PRINT;
 		return 0;
 	}
 	//asbestos REQ_GET_STAGE2_SIZE
@@ -876,6 +888,16 @@ usbMsgLen_t usbFunctionSetup(uchar data[8]) {
 			outBuffer_Write_Byte(eight[i]);
 		}
 		return sendOutBuffer();
+	}
+	//eeprom programming REQ_WRITE_EEPROM_BYTE
+	if (port_cur == 6 && rq->bmRequestType == TYPE_HOST2DEV && rq->bRequest == REQ_WRITE_EEPROM_BYTE) {
+		DBGMSG2("writing eeprom requested.");
+		eeprom_id = rq->wValue.word;
+		writeop=WRITE_EEPROM;
+		currentPosition=rq->wIndex.word;
+		DBGX2("eeid:", (uchar *)&eeprom_id, sizeof(eeprom_id));
+		DBGX2("ofst:", (uchar *)&currentPosition, sizeof(currentPosition));
+		return 0;
 	}
 #endif
 	//done

@@ -28,27 +28,28 @@ def eeread(dev,eeid):
 		sys.stdout.write(''.join([chr(x) for x in buf]))
 		i+=1
 	return
-"""def eewrite(path,verbose):
+def eewrite(dev,eeid,path,verbose):
 	f=open(path,"rb")
 	buf=f.read()
 	f.close()
-	if len(buf)>65534:
+	size=len(buf)
+	if size>65534:
 		print >>sys.stderr,"file is too big."
 		return
-	eesetsize(ser,len(buf))
+	eesetsize(dev,eeid,size)
+	dbgprint(dev,"eexfer> Requesting write eeprom.\n")
 	f=open(path,"rb")
-	ser.write('w')
-	buf=f.read(28)
-	while len(buf)!=0:
-		ser.write(buf)
+	i=0
+	while i<size:
+		buf=f.read(1)
+		dev.ctrl_transfer(0x40, 7, eeid, i, buf)
 		#sys.stdout.write(buf)
-		if verbose:
+		if verbose and i%256==0:
 			sys.stderr.write('.')
-		buf=f.read(28)
-		while len(ser.read())==0:
-			pass
+		i+=1
 	if verbose:
-		sys.stderr.write('\n')"""
+		sys.stderr.write('\n')
+	return
 def eegetsize(dev,eeid):
 	dbgprint(dev,"eexfer> Requesting eeprom data size.\n")
 	s=dev.ctrl_transfer(0xc0, 4, eeid, 0, 2)
@@ -91,8 +92,8 @@ def main():
 		dbgprint(dev, options.debugprintn)
 	if options.read:
 		eeread(dev, eeid)
-	"""if options.write:
-		eewrite(options.write,options.verbose)"""
+	if options.write:
+		eewrite(dev, eeid, options.write, options.verbose)
 	if options.getsize:
 		print eegetsize(dev, eeid)
 	if options.setsize:
