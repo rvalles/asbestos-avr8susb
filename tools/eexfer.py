@@ -8,6 +8,13 @@ import usb.core
 import usb.util
 import sys
 import struct
+def dbgprint(dev,msg):
+	assert dev.ctrl_transfer(0x40, 1, 0, 0, msg)
+	return
+def dbgprintnl(dev,msg):
+	dbgprint(dev,msg)
+	dbgprint(dev,"\n")
+	return
 """def eeread():
 	size=eegetsize(ser)
 	ser.write('r')
@@ -37,21 +44,25 @@ import struct
 			pass
 	if verbose:
 		sys.stderr.write('\n')"""
-def eegetsize(dev):
-	s=dev.ctrl_transfer(0xc0, 4, 0xa0, 0, 2)
+def eegetsize(dev,eeid):
+	dbgprintnl(dev,"eexfer> Requesting eeprom data size.")
+	s=dev.ctrl_transfer(0xc0, 4, eeid, 0, 2)
 	if len(s) != 2:
 		print >>sys.stderr,"something didn't go well.."
 		return
 	size=struct.unpack("<H", s)
 	size=size[0]
 	return size
-"""def eesetsize(size):
-	ser.write('t')
-	ser.write(struct.pack("<H",int(size)))"""
+def eesetsize(dev,eeid,size):
+	dbgprintnl(dev,"eexfer> Setting eeprom data size.")
+	z=dev.ctrl_transfer(0x40, 5, eeid, size, None)
+	#ser.write(struct.pack("<H",int(size)))"""
 def main():
 	optparser = OptionParser("usage: %prog [options]",version="%prog 0.1")
 	optparser.add_option("--verbose", action="store_true", dest="verbose", help="be verbose", default=False)
-	#optparser.add_option("--serial", dest="serial", help="specify serial port", default="/dev/ttyUSB0", metavar="dev")
+	optparser.add_option("--print", dest="debugprint",help="print string through device's debug output", metavar="msg")
+	optparser.add_option("--printn", dest="debugprintn",help="print string through device's debug output without terminating newline", metavar="msg")
+	optparser.add_option("--eeid", dest="eeid", help="specify eeprom i2c address", default=0xa0, metavar="hexaddr")
 	optparser.add_option("--read", action="store_true", dest="read", help="read eeprom to stdout", default=False)
 	optparser.add_option("--write", dest="write",help="write eeprom from file", metavar="path")
 	optparser.add_option("--getsize", action="store_true", dest="getsize", help="obtain current data size from eeprom", default=False)
@@ -59,21 +70,23 @@ def main():
 	(options, args) = optparser.parse_args()
 	if len(args) != 0:
 		optparser.error("incorrect number of arguments")
-	#ser = serial.Serial(options.serial, 57600, timeout=1)
-	#time.sleep(3)
-	#trash=ser.read(10)
+	options.eeid=int(options.eeid,16)
 	dev = usb.core.find(idVendor=0xaaaa, idProduct=0x3713)
 	if dev is None:
 	    print >>sys.stderr,"usb device not found."
 	    return
 	dev.set_configuration()
-	"""if options.read:
+	if options.debugprint:
+		dbgprintnl(dev, options.debugprint)
+	if options.debugprintn:
+		dbgprint(dev, options.debugprintn)
+	if options.read:
 		eeread()
-	if options.write:
+	"""if options.write:
 		eewrite(options.write,options.verbose)"""
 	if options.getsize:
-		print eegetsize(dev)
-	"""if options.setsize:
-		eesetsize(options.setsize)"""
+		print eegetsize(dev, options.eeid)
+	if options.setsize:
+		eesetsize(dev, options.eeid, int(options.setsize))
 if __name__ == '__main__':
 	main()

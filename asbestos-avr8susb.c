@@ -755,7 +755,8 @@ enum {
         REQ_PRINT = 1,
         REQ_GET_STAGE2_SIZE,
         REQ_READ_STAGE2_BLOCK,
-	REQ_GET_EEPROM_SIZE
+	REQ_GET_EEPROM_SIZE,
+	REQ_SET_EEPROM_SIZE
 };
 #endif
 uchar usbFunctionRead(uchar *data, uchar len) {
@@ -839,6 +840,16 @@ usbMsgLen_t usbFunctionSetup(uchar data[8]) {
 		DBGX1("size:", (uchar*)&size, sizeof(size));
 		outBuffer_Write_Word(size);
 		return sendOutBuffer();
+	}
+	//eeprom programming REQ_SET_EEPROM_SIZE
+	if (port_cur == 6 && rq->bmRequestType == TYPE_HOST2DEV && rq->bRequest == REQ_SET_EEPROM_SIZE) {
+		unsigned char eeid = rq->wValue.word;
+		DBGMSG2("setting eeprom size requested.");
+		DBGX1("eeid:", (uchar*)&eeid, sizeof(eeid));
+		DBGX1("size:", (uchar*)&rq->wIndex.word, sizeof(rq->wIndex.word));
+		ee24xx_write_bytes(eeid, 0, 2, (uint8_t *)&rq->wIndex.word);
+		DBGBB1(0xFF,0x77);
+		return 0;
 	}
 	//REQ_DONE
 	/*if (port_cur == 6 && rq->bmRequestType == TYPE_DEV2HOST && rq->bRequest == REQ_DONE) {
