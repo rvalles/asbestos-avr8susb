@@ -27,9 +27,9 @@
 #include <avr/io.h>
 #include <util/twi.h>		/* Note [1] */
 
-#include "oddebug.h"
+//#include "oddebug.h"
 
-#define DEBUG 1
+#undef DEBUG
 
 /*
  * System clock in Hz.
