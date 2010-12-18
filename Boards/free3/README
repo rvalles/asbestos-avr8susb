@@ -4,3 +4,6 @@ D- <--> 68 ohm <--> PD2
 GND <--> Zener <--> D+
 D+ <--> 68 ohm <--> PD4
 PB2-5 <--> 1-4 DIPSWITCH <--> GND
+
+EEPROM 0 I2C ADDR: 0xa0
+EEPROM 1 I2C ADDR: 0xa2

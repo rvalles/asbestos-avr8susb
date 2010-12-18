@@ -328,7 +328,7 @@ int main(void) {
 				break;
 			case 0x4:
 #ifdef EEPROM
-				eeprom_id=0xa1;
+				eeprom_id=0xa2;
 #else
 				panic(RED, GREEN);
 #endif
@@ -756,7 +756,10 @@ enum {
         REQ_GET_STAGE2_SIZE,
         REQ_READ_STAGE2_BLOCK,
 	REQ_GET_EEPROM_SIZE,
-	REQ_SET_EEPROM_SIZE
+	REQ_SET_EEPROM_SIZE,
+	REQ_READ_EEPROM_BYTE,
+	REQ_WRITE_EEPROM_BYTE,
+	REQ_READ_EEPROM_EIGHT
 };
 #endif
 uchar usbFunctionRead(uchar *data, uchar len) {
@@ -830,14 +833,16 @@ usbMsgLen_t usbFunctionSetup(uchar data[8]) {
 		}
 		return USB_NO_MSG;
 	}
+#endif
+#ifdef EEPROM
 	//eeprom programming REQ_GET_EEPROM_SIZE
 	if (port_cur == 6 && rq->bmRequestType == TYPE_DEV2HOST && rq->bRequest == REQ_GET_EEPROM_SIZE) {
 		unsigned int size;
 		unsigned char eeid = rq->wValue.word;
 		DBGMSG2("eeprom size requested.");
-		DBGX1("eeid:", (uchar*)&eeid, sizeof(eeid));
+		DBGX2("eeid:", (uchar*)&eeid, sizeof(eeid));
 		ee24xx_read_bytes(eeid, 0, 2, (uint8_t *)&size);
-		DBGX1("size:", (uchar*)&size, sizeof(size));
+		DBGX2("size:", (uchar*)&size, sizeof(size));
 		outBuffer_Write_Word(size);
 		return sendOutBuffer();
 	}
@@ -845,17 +850,33 @@ usbMsgLen_t usbFunctionSetup(uchar data[8]) {
 	if (port_cur == 6 && rq->bmRequestType == TYPE_HOST2DEV && rq->bRequest == REQ_SET_EEPROM_SIZE) {
 		unsigned char eeid = rq->wValue.word;
 		DBGMSG2("setting eeprom size requested.");
-		DBGX1("eeid:", (uchar*)&eeid, sizeof(eeid));
-		DBGX1("size:", (uchar*)&rq->wIndex.word, sizeof(rq->wIndex.word));
+		DBGX2("eeid:", (uchar*)&eeid, sizeof(eeid));
+		DBGX2("size:", (uchar*)&rq->wIndex.word, sizeof(rq->wIndex.word));
 		ee24xx_write_bytes(eeid, 0, 2, (uint8_t *)&rq->wIndex.word);
 		DBGBB1(0xFF,0x77);
 		return 0;
 	}
-	//REQ_DONE
-	/*if (port_cur == 6 && rq->bmRequestType == TYPE_DEV2HOST && rq->bRequest == REQ_DONE) {
-		setLed(NONE);
-		panic(RED, GREEN);
-	}*/
+	//eeprom programming REQ_READ_EEPROM_BYTE
+	if (port_cur == 6 && rq->bmRequestType == TYPE_DEV2HOST && rq->bRequest == REQ_READ_EEPROM_BYTE) {
+		unsigned char eeid = rq->wValue.word;
+		unsigned char byte;
+		DBGMSG2("reading eeprom requested.");
+		ee24xx_read_bytes(eeid, 2+rq->wIndex.word, 1, &byte);
+		outBuffer_Write_Byte(byte);
+		return sendOutBuffer();
+	}
+	//eeprom programming REQ_READ_EEPROM_EIGHT
+	if (port_cur == 6 && rq->bmRequestType == TYPE_DEV2HOST && rq->bRequest == REQ_READ_EEPROM_EIGHT) {
+		unsigned char eeid = rq->wValue.word;
+		unsigned char eight[8];
+		unsigned char i;
+		DBGMSG2("reading eeprom requested.");
+		ee24xx_read_bytes(eeid, 2+rq->wIndex.word, 8, (uint8_t *)&eight);
+		for(i=0;i<8;i++){
+			outBuffer_Write_Byte(eight[i]);
+		}
+		return sendOutBuffer();
+	}
 #endif
 	//done
 	if (port_cur == 6 && rq->bRequest == 0xAA) {

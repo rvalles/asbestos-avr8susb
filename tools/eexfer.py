@@ -15,14 +15,19 @@ def dbgprintnl(dev,msg):
 	dbgprint(dev,msg)
 	dbgprint(dev,"\n")
 	return
-"""def eeread():
-	size=eegetsize(ser)
-	ser.write('r')
+def eeread(dev,eeid):
+	size=eegetsize(dev,eeid)
+	dbgprint(dev,"eexfer> Requesting read eeprom.\n")
 	i=0
+	while i+8<size:
+		buf=dev.ctrl_transfer(0xc0, 8, eeid, i, 8)
+		sys.stdout.write(''.join([chr(x) for x in buf]))
+		i+=8
 	while i<size:
-		buf=ser.read(256)
-		sys.stdout.write(buf)
-		i=i+len(buf)"""
+		buf=dev.ctrl_transfer(0xc0, 6, eeid, i, 1)
+		sys.stdout.write(''.join([chr(x) for x in buf]))
+		i+=1
+	return
 """def eewrite(path,verbose):
 	f=open(path,"rb")
 	buf=f.read()
@@ -45,7 +50,7 @@ def dbgprintnl(dev,msg):
 	if verbose:
 		sys.stderr.write('\n')"""
 def eegetsize(dev,eeid):
-	dbgprintnl(dev,"eexfer> Requesting eeprom data size.")
+	dbgprint(dev,"eexfer> Requesting eeprom data size.\n")
 	s=dev.ctrl_transfer(0xc0, 4, eeid, 0, 2)
 	if len(s) != 2:
 		print >>sys.stderr,"something didn't go well.."
@@ -54,8 +59,11 @@ def eegetsize(dev,eeid):
 	size=size[0]
 	return size
 def eesetsize(dev,eeid,size):
-	dbgprintnl(dev,"eexfer> Setting eeprom data size.")
+	dbgprint(dev,"eexfer> Setting eeprom data size.\n")
 	z=dev.ctrl_transfer(0x40, 5, eeid, size, None)
+	if eegetsize(dev,eeid) != size:
+		print >>sys.stderr,"something didn't go well..."
+		return
 	#ser.write(struct.pack("<H",int(size)))
 	return
 def main():
@@ -71,7 +79,7 @@ def main():
 	(options, args) = optparser.parse_args()
 	if len(args) != 0:
 		optparser.error("incorrect number of arguments")
-	options.eeid=int(options.eeid,16)
+	eeid=int(options.eeid,16)
 	dev = usb.core.find(idVendor=0xaaaa, idProduct=0x3713)
 	if dev is None:
 	    print >>sys.stderr,"usb device not found."
@@ -82,12 +90,12 @@ def main():
 	if options.debugprintn:
 		dbgprint(dev, options.debugprintn)
 	if options.read:
-		eeread()
+		eeread(dev, eeid)
 	"""if options.write:
 		eewrite(options.write,options.verbose)"""
 	if options.getsize:
-		print eegetsize(dev, options.eeid)
+		print eegetsize(dev, eeid)
 	if options.setsize:
-		eesetsize(dev, options.eeid, int(options.setsize))
+		eesetsize(dev, eeid, int(options.setsize))
 if __name__ == '__main__':
 	main()
