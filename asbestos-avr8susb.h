@@ -18,6 +18,8 @@
 #define RED_DDR    USB_DDRPORT(RED_LED_PORT)
 //Stage2 support.
 #define STAGE2
+//EEPROM support. Good idea if the stage2 can't be made to fit elsewhere.
+#define EEPROM
 //DIP switch to GND on PB2-PB5.
 #define DIPSWITCH
 //Service mode JIG emulation

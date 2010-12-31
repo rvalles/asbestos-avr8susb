@@ -43,9 +43,9 @@
 #include "stage2a.h"
 #include "stage2b.h"
 #endif
+#endif
 #ifdef EEPROM
 #include <eeprom.h>
-#endif
 #endif
 void setLed(int color) {
 	RED_PORT &= ~(1 << RED_BIT);
@@ -359,6 +359,7 @@ int main(void) {
 		}
 	}
 #endif
+#ifdef JIG
 	if(setting==FINALDEV_SETTING){
 		for(;;){
 			if (port_cur == 0)
@@ -382,6 +383,7 @@ int main(void) {
 			}
 		}
 	}
+#endif
 	for(;;){
 		if (port_cur == 0)
 			HUB_Task();
@@ -753,10 +755,12 @@ uchar usbFunctionWrite(uchar *data, uchar len) {
 				uartPuts((char*)tdata);
 				return 0;
 				break;
+#ifdef EEPROM
 			case WRITE_EEPROM:
 				ee24xx_write_bytes(eeprom_id, 2+currentPosition, len, (uint8_t *)data);
 				return 0;
 				break;
+#endif
 		}
 	}
 	return 0xff; //there is no logic to handle when the state isn't p5 or done.
